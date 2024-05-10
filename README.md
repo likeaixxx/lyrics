@@ -10,4 +10,4 @@ server:GIN Web 调用第三放API获取歌词,合并结果提供给APP调用获�
 ... 建议不启动
 
 ### 鸣谢
-[LyricsX](https://github.com/aviwad/LyricFever)
+[LyricFever](https://github.com/aviwad/LyricFever)
