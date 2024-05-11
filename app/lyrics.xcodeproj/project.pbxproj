@@ -34,6 +34,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		615C59852BEF62BB00D81B37 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6183B15C2BECD44F0008EF1E /* lyrics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = lyrics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6183B15F2BECD44F0008EF1E /* lyricsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lyricsApp.swift; sourceTree = "<group>"; };
 		6183B1632BECD4510008EF1E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -95,6 +96,7 @@
 		6183B15E2BECD44F0008EF1E /* lyrics */ = {
 			isa = PBXGroup;
 			children = (
+				615C59852BEF62BB00D81B37 /* Info.plist */,
 				6183B15F2BECD44F0008EF1E /* lyricsApp.swift */,
 				6183B1632BECD4510008EF1E /* Assets.xcassets */,
 				6183B1682BECD4510008EF1E /* lyrics.entitlements */,
@@ -429,6 +431,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = lyrics/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "I need to access Spotify / Apple Music to play the lyrics properly.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -458,6 +461,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = lyrics/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "I need to access Spotify / Apple Music to play the lyrics properly.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";

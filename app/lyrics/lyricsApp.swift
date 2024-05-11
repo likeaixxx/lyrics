@@ -22,6 +22,7 @@ struct LyricForm: Codable {
     let name: String
     let singer: String?
     let id: String?
+    let refresh: Bool?
 }
 
 struct LyricResponseBody: Codable {
@@ -72,7 +73,7 @@ func parseLyricsLine(lyricsLine: String) -> LyricLine {
                let milliseconds = Int(secondParts[1]) {
                 
                 let totalSeconds = TimeInterval(minutes * 60 + seconds) + TimeInterval(milliseconds) / 1000.0
-                return LyricLine(time: totalSeconds, text: text.decodeHTML())
+                return LyricLine(time: totalSeconds, text: "♪" + text.decodeHTML())
             }
         }
     }
@@ -83,6 +84,9 @@ func parseLyrics(_ lyrics: [String]) -> [LyricLine] {
     return lyrics.compactMap { line in
         return parseLyricsLine(lyricsLine: line)
     }
+    .filter{ line in
+        return line.text != "♪"
+    }
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -92,12 +96,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Refresh", action: #selector(forceRefresh), keyEquivalent: "r"))
+        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        self.statusBarItem?.menu = menu
+        
         setupPeriodicLyricUpdate()
     }
     
     func setupPeriodicLyricUpdate() {
         Timer.scheduledTimer(withTimeInterval: 1.2, repeats: true) { [weak self] _ in
-            self?.checkForMusicChangeAndUpdateLyrics()
+            self?.checkForMusicChangeAndUpdateLyrics(refresh: false)
         }
     }
     
@@ -105,7 +115,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let spotifyApp = SpotifyScriptProvider.shared.spotifyApp,
               spotifyApp.playerState == .playing,
               let currentTrackPosition = spotifyApp.playerPosition else {
-            statusBarItem?.button?.title = "Spotify not running or no track"
+            statusBarItem?.button?.title = "..."
             return
         }
         
@@ -118,33 +128,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    func checkForMusicChangeAndUpdateLyrics() {
+    func checkForMusicChangeAndUpdateLyrics(refresh: Bool) {
         guard let spotifyApp = SpotifyScriptProvider.shared.spotifyApp,
               spotifyApp.playerState == .playing,
               let currentTrack = spotifyApp.currentTrack,
               let _ = currentTrack.name else {
-            statusBarItem?.button?.title = "Spotify not running or no track"
+            statusBarItem?.button?.title = "..."
             return
         }
         
-        if let trackId = currentTrack.id?(), trackId != self.currentTrackID {
+        if let trackId = currentTrack.id?(), trackId != self.currentTrackID || refresh {
             self.currentTrackID = trackId
-            self.updateLyricsForCurrentSong(currentTrack: currentTrack)
+            self.updateLyricsForCurrentSong(currentTrack: currentTrack, refresh: refresh)
         }
         self.updateLyricsOnStatusBar()
     }
     
-    func updateLyricsForCurrentSong(currentTrack: SpotifyTrack) {
+    func updateLyricsForCurrentSong(currentTrack: SpotifyTrack, refresh: Bool) {
         guard let trackName = currentTrack.name, let trackArtist = currentTrack.artist else {
             print("Error: Track name and artist must not be nil")
             return
         }
         
-        let lyricForm = LyricForm(name: trackName, singer: trackArtist, id: currentTrack.id?())
+        let lyricForm = LyricForm(name: trackName, singer: trackArtist, id: currentTrack.id?(), refresh: refresh)
         guard let requestBody = try? JSONEncoder().encode(lyricForm) else {
             print("Error: Unable to encode lyricForm")
             return
         }
+        
         
         if let url = URL(string: "http://localhost:8080/api/v1/lyrics") {
             var request = URLRequest(url: url)
@@ -154,8 +165,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             let session = URLSession.shared
             let task = session.dataTask(with: request) { [weak self] data, response, error in
-                if let error = error {
-                    print("Network error: \(error)")
+                if error != nil {
+                    self?.updateFailed(message: "Network Error")
                     return
                 }
                 
@@ -191,6 +202,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             menu.addItem(menuItem)
         }
         menu.addItem(NSMenuItem.separator())  // Optional separator
+        menu.addItem(NSMenuItem(title: "Refresh", action: #selector(forceRefresh), keyEquivalent: "r"))
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         self.statusBarItem?.menu = menu
     }
@@ -199,7 +211,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let itemList = sender.representedObject as? [LyricResponseItem],
            let index = sender.menu?.index(of: sender) {
             self.reload(data: itemList[index])
+        
+            guard let requestBody = try? JSONEncoder().encode(itemList[index]) else {
+                print("Error: Unable to encode lyricForm")
+                return
+            }
+            if let url = URL(string: "http://localhost:8080/api/v1/lyrics/confirm") {
+                var request = URLRequest(url: url)
+                request.httpMethod = "POST"
+                request.httpBody = requestBody
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                
+                let session = URLSession.shared
+                let task = session.dataTask(with: request) { [weak self] data, response, error in
+                    if error != nil {
+                        self?.updateFailed(message: "Network Error")
+                        return
+                    }
+                }
+                task.resume()
+            }
         }
+    }
+    
+    @objc func forceRefresh() {
+        self.checkForMusicChangeAndUpdateLyrics(refresh: true)
     }
     
     func reload(data: LyricResponseItem) {
@@ -212,6 +248,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             } else {
                 print("Failed to decode lyrics from data.")
             }
+        }
+    }
+    
+    func updateFailed(message: String) {
+        DispatchQueue.main.async {
+            self.statusBarItem?.button?.title = "☹️" + message
         }
     }
 }
