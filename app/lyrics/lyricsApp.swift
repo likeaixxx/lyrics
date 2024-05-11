@@ -28,7 +28,7 @@ struct LyricForm: Codable {
 struct LyricResponseBody: Codable {
     let code: Int
     let message: String?
-    let data: [LyricResponseItem]
+    let data: [LyricResponseItem]?
 }
 
 struct LyricResponseItem: Codable {
@@ -156,8 +156,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         
-        
-        if let url = URL(string: "http://localhost:8080/api/v1/lyrics") {
+         if let url = URL(string: "http://localhost:8080/api/v1/lyrics") {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.httpBody = requestBody
@@ -179,8 +178,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 do {
                     let lyricResponse = try JSONDecoder().decode(LyricResponseBody.self, from: data)
                     let itemList = lyricResponse.data
-                    DispatchQueue.main.async {
-                        self?.createMenuWithItems(items: itemList)
+                    if let itemList = lyricResponse.data {
+                        DispatchQueue.main.async {
+                            self?.createMenuWithItems(items: itemList)
+                        }
+                    } else {
+                        self?.updateFailed(message: "Nothing Found")
                     }
                 } catch {
                     print("Failed to decode data: \(error)")
@@ -216,6 +219,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 print("Error: Unable to encode lyricForm")
                 return
             }
+
             if let url = URL(string: "http://localhost:8080/api/v1/lyrics/confirm") {
                 var request = URLRequest(url: url)
                 request.httpMethod = "POST"
