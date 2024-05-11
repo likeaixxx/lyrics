@@ -7,4 +7,6 @@ type SearchRequest struct {
 	Singer string `json:"singer"`
 	// spotify 歌曲ID
 	Id string `json:"id"`
+	// 强制刷新
+	Refresh bool `json:"refresh"`
 }

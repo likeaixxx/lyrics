@@ -3,6 +3,7 @@ package provider
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"log"
 	"lyrics/app-utils"
@@ -19,8 +20,8 @@ type QQMusicLyrics struct {
 var searchBaseUrl = "https://c.y.qq.com/splcloud/fcgi-bin/smartbox_new.fcg?key=%s"
 var lyricsBaseUrl = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?songmid=%s&g_tk=5381&format=json"
 
-func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.Result {
-	var result []model.Result
+func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.MusicRelation {
+	var result []model.MusicRelation
 
 	data, done := search.search(request.Name + "-" + request.Singer)
 	if done {
@@ -32,6 +33,19 @@ func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.Result {
 		if done {
 			return result
 		}
+		if len(data.Data.Song.Itemlist) < 1 {
+			split := []string{"(", "（", "-", "《"}
+			minIndex := len(request.Name)
+			for _, sep := range split {
+				if idx := strings.Index(request.Name, sep); idx != -1 && idx < minIndex {
+					minIndex = idx
+				}
+			}
+			if minIndex == len(request.Name) {
+				return result
+			}
+			data, done = search.search(request.Name[:minIndex])
+		}
 	}
 
 	for _, song := range data.Data.Song.Itemlist {
@@ -41,7 +55,7 @@ func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.Result {
 			log.Printf(err.Error())
 			continue
 		}
-		result = append(result, model.Result{
+		result = append(result, model.MusicRelation{
 			Name:   song.Name,
 			Singer: song.Singer,
 			Lid:    song.Mid,

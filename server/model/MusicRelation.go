@@ -1,6 +1,6 @@
 package model
 
-type Result struct {
+type MusicRelation struct {
 	Singer string `json:"singer"`
 	Name   string `json:"name"`
 	Sid    string `json:"sid"`

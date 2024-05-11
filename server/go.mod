@@ -1,10 +1,12 @@
 module lyrics
 
+// TODO ecs go version is 1.20.🥶
 go 1.20
 
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/liuzl/gocc v0.0.0-20231231122217-0372e1059ca5
+	github.com/mattn/go-sqlite3 v1.14.22
 )
 
 require (
