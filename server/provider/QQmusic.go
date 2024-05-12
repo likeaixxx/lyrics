@@ -49,7 +49,7 @@ func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.MusicRel
 	}
 
 	for _, song := range data.Data.Song.Itemlist {
-		log.Printf(fmt.Sprintf("[INFO] GET Song [%s - %s], MusicId [%s]", song.Name, song.Singer, song.Mid))
+		log.Printf(fmt.Sprintf("[INFO] GET Song [%s - %s], MusicId [%s, %s]", song.Name, song.Singer, song.Mid, request.Id))
 		lyrics, err := search.lyrics(song.Mid)
 		if err != nil {
 			log.Printf(err.Error())
