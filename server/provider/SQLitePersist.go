@@ -9,10 +9,10 @@ import (
 )
 
 var path = "./persist/lyrics.db"
+var Flag = "Arch"
 
 type sqlitePersist struct {
 	path string
-	flag string
 }
 
 var Persist = persistProvider()
@@ -20,7 +20,6 @@ var Persist = persistProvider()
 func persistProvider() sqlitePersist {
 	persist := sqlitePersist{
 		path: path,
-		flag: "Arch",
 	}
 	return persist.lyricsTable()
 }
@@ -64,7 +63,7 @@ func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRe
 			Sid:    request.Id,
 			// 获取歌词
 			Lyrics: lyrics,
-			Type:   fmt.Sprintf("%s.%s", lyricsType, persist.flag),
+			Type:   fmt.Sprintf("%s.%s", lyricsType, Flag),
 		})
 	}
 	return result

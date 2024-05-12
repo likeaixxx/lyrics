@@ -7,6 +7,7 @@ import (
 	"lyrics/model"
 	"lyrics/provider"
 	"lyrics/response"
+	"strings"
 )
 
 func Run() {
@@ -20,7 +21,9 @@ func Run() {
 }
 
 func confirm(c *gin.Context) {
-	provider.Persist.Upsert(apputils.FromGinPostJson[model.MusicRelation](c))
+	relation := apputils.FromGinPostJson[model.MusicRelation](c)
+	strings.ReplaceAll(relation.Type, provider.Flag, "")
+	provider.Persist.Upsert(relation)
 	response.Success(c)
 }
 
