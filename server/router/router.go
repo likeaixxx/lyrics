@@ -3,7 +3,6 @@ package router
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	apputils "lyrics/app-utils"
 	"lyrics/model"
 	"lyrics/provider"
@@ -33,9 +32,7 @@ func lyrics(c *gin.Context) {
 	}
 	if len(data) < 1 {
 		data = provider.QQMusicLyrics{}.Lyrics(request)
-		log.Printf("len(data) < %d", len(data))
 		if len(data) > 0 {
-			log.Printf("len(data) > %d", len(data))
 			// 随机持久化一条, 后续用户点击后再更新
 			provider.Persist.Upsert(data[0])
 		}
