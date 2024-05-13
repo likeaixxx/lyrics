@@ -29,6 +29,8 @@ func HttpGet[T any](urlRedirect string, headers map[string]string) (T, error) {
 		req.Header.Set(k, v)
 	}
 
+	log.Printf("%v", req)
+
 	var data T
 	resp, err := c.Do(req)
 	if err != nil {
