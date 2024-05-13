@@ -1,6 +1,7 @@
 import SwiftUI
 import ScriptingBridge
 import Foundation
+import UserNotifications
 
 @main
 struct LyricsApp: App {
@@ -31,6 +32,10 @@ struct LyricResponseBody: Codable {
     let data: [LyricResponseItem]?
 }
 
+let QQ    = "QQ Music"
+let KuGou = "KuGou Music"
+let NetEase = "NetEase Music"
+
 struct LyricResponseItem: Codable {
     let singer: String
     let name: String
@@ -57,52 +62,72 @@ extension String {
     }
 }
 
-func parseLyricsLine(lyricsLine: String) -> LyricLine {
+func parseLyricsLine(lyricsLine: String) -> LyricLine? {
+    print("\(lyricsLine)")
     let components = lyricsLine.components(separatedBy: "]")
     if components.count > 1, let timeString = components.first, let text = components.last {
         let cleanTime = timeString.trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
-
         let timeParts = cleanTime.components(separatedBy: ":")
         if timeParts.count == 2 {
             let minutePart = timeParts[0]
             let secondParts = timeParts[1].components(separatedBy: ".")
-            
             if secondParts.count == 2,
                let minutes = Int(minutePart),
                let seconds = Int(secondParts[0]),
                let milliseconds = Int(secondParts[1]) {
                 
                 let totalSeconds = TimeInterval(minutes * 60 + seconds) + TimeInterval(milliseconds) / 1000.0
-                return LyricLine(time: totalSeconds, text: "♪" + text.decodeHTML())
+                let line = text.decodeHTML()
+                if !line.isEmpty {
+                    return LyricLine(time: totalSeconds, text: "♪ " + line)
+                }
             }
         }
     }
-    return LyricLine(time: 0.0, text: "")
+    return nil
 }
 
 func parseLyrics(_ lyrics: [String]) -> [LyricLine] {
     return lyrics.compactMap { line in
         return parseLyricsLine(lyricsLine: line)
     }
-    .filter{ line in
-        return line.text != "♪"
-    }
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarItem: NSStatusItem?
+    var popover: NSPopover?
+    
     var lyricLines: [LyricLine] = []
     var currentTrackID: String?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                if settings.authorizationStatus == .authorized {
+                    // 已授权，可以排定或发送通知
+                } else {
+                    self.requestNotificationPermission()
+                }
+            }
+        }
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "Refresh", action: #selector(forceRefresh), keyEquivalent: "r"))
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         self.statusBarItem?.menu = menu
-        
+        popover = NSPopover()
+        popover?.behavior = .transient
         setupPeriodicLyricUpdate()
+    }
+    
+    func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+            if granted {
+                print("通知权限已授权")
+            } else if let error = error {
+                print("请求通知权限出错: \(error)")
+            }
+        }
     }
     
     func setupPeriodicLyricUpdate() {
@@ -140,23 +165,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let trackId = currentTrack.id?(), trackId != self.currentTrackID || refresh {
             self.currentTrackID = trackId
             self.updateLyricsForCurrentSong(currentTrack: currentTrack, refresh: refresh)
+            if !refresh {
+                self.eventPush(currentTrack: currentTrack)
+            }
         }
         self.updateLyricsOnStatusBar()
     }
     
-    func updateLyricsForCurrentSong(currentTrack: SpotifyTrack, refresh: Bool) {
-        guard let trackName = currentTrack.name, let trackArtist = currentTrack.artist else {
-            print("Error: Track name and artist must not be nil")
-            return
-        }
-        
-        let lyricForm = LyricForm(name: trackName, singer: trackArtist, id: currentTrack.id?(), refresh: refresh)
-        guard let requestBody = try? JSONEncoder().encode(lyricForm) else {
+    fileprivate func searchMusic(_ form: LyricForm) {
+        guard let requestBody = try? JSONEncoder().encode(form) else {
             print("Error: Unable to encode lyricForm")
             return
         }
         
-         if let url = URL(string: "http://localhost:8080/api/v1/lyrics") {
+        if let url = URL(string: "http://localhost:8080/api/v1/lyrics") {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.httpBody = requestBody
@@ -172,12 +194,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
                       let data = data else {
                     print("Server error or invalid response data")
+                    self?.updateFailed(message: "Network Error")
                     return
                 }
                 
                 do {
                     let lyricResponse = try JSONDecoder().decode(LyricResponseBody.self, from: data)
-                    let itemList = lyricResponse.data
                     if let itemList = lyricResponse.data {
                         DispatchQueue.main.async {
                             self?.createMenuWithItems(items: itemList)
@@ -193,6 +215,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    func updateLyricsForCurrentSong(currentTrack: SpotifyTrack, refresh: Bool) {
+        guard let trackName = currentTrack.name, let trackArtist = currentTrack.artist else {
+            print("Error: Track name and artist must not be nil")
+            return
+        }
+        self.searchMusic(LyricForm(name: trackName, singer: trackArtist, id: currentTrack.id?(), refresh: refresh))
+    }
+    
     func createMenuWithItems(items: [LyricResponseItem]) {
         let menu = NSMenu()
         for (index, item) in items.enumerated() {
@@ -206,6 +236,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         menu.addItem(NSMenuItem.separator())  // Optional separator
         menu.addItem(NSMenuItem(title: "Refresh", action: #selector(forceRefresh), keyEquivalent: "r"))
+        menu.addItem(NSMenuItem(title: "Search", action: #selector(customerInputSearch), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Clean Waning", action: #selector(clean), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         self.statusBarItem?.menu = menu
     }
@@ -214,12 +246,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let itemList = sender.representedObject as? [LyricResponseItem],
            let index = sender.menu?.index(of: sender) {
             self.reload(data: itemList[index])
-        
+            
             guard let requestBody = try? JSONEncoder().encode(itemList[index]) else {
                 print("Error: Unable to encode lyricForm")
                 return
             }
-
             if let url = URL(string: "http://localhost:8080/api/v1/lyrics/confirm") {
                 var request = URLRequest(url: url)
                 request.httpMethod = "POST"
@@ -242,15 +273,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.checkForMusicChangeAndUpdateLyrics(refresh: true)
     }
     
+    @objc func clean() {
+        self.lyricLines = []
+        self.statusBarItem?.button?.title = "☹️..."
+    }
+    
     func reload(data: LyricResponseItem) {
-        if let lyricsData = Data(base64Encoded: data.lyrics) {
-            if let lyrics = String(data: lyricsData, encoding: .utf8) {
-                let lyricsLines = lyrics.split(separator: "\n").map(String.init)
+        if data.type == QQ || data.type == NetEase {
+            if let lyricsData = Data(base64Encoded: data.lyrics) {
+                if let lyrics = String(data: lyricsData, encoding: .utf8) {
+                    let lyricsLines = lyrics.split(separator: "\n").map(String.init)
+                    DispatchQueue.main.async {
+                        self.lyricLines = parseLyrics(lyricsLines)
+                    }
+                } else {
+                    print("Failed to decode lyrics from data.")
+                }
+            }
+        }
+        
+        if data.type == KuGou {
+            if let lyricsData = decryptKugouKrc(data.lyrics.data(using: .ascii)!) {
+                let lyricsLines = lyricsData.split(separator: "\n").map(String.init)
+                lyricsLines.forEach { line in
+                    print("\(line)")
+                }
                 DispatchQueue.main.async {
                     self.lyricLines = parseLyrics(lyricsLines)
                 }
-            } else {
-                print("Failed to decode lyrics from data.")
             }
         }
     }
@@ -259,5 +309,75 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.async {
             self.statusBarItem?.button?.title = "☹️" + message
         }
+    }
+    
+    func eventPush(currentTrack: SpotifyTrack) {
+        if let name = currentTrack.name, !name.isEmpty {
+            self.sendNotification(title: name, subtitle: currentTrack.artist ?? "", body: "")
+        }
+    }
+    
+    func sendNotification(title: String, subtitle: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.subtitle = subtitle
+        content.body = body
+        content.sound = UNNotificationSound.default
+        
+        // 通知触发器
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        
+        // 创建一个通知请求
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        
+        // 将请求添加到通知中心
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("通知发送失败: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    @objc func customerInputSearch() {
+        guard let popover = popover, let statusItem = self.statusBarItem else { return }
+        
+        if popover.isShown {
+            popover.performClose(nil)
+        } else {
+            let contentView = PopupView { name, singer in
+                // Handle the submitted text here
+                popover.performClose(nil)
+                self.searchMusic(LyricForm(name: name, singer: singer, id: self.currentTrackID, refresh: true))
+            }
+            popover.contentViewController = NSHostingController(rootView: contentView)
+            popover.show(relativeTo: statusItem.button!.bounds, of: statusItem.button!, preferredEdge: .minY)
+        }
+    }
+}
+
+struct PopupView: View {
+    var onSubmit: (String, String) -> Void
+    @State private var name: String = ""
+    @State private var singer: String = ""
+    
+    var body: some View {
+        VStack {
+            Text("Search")
+            TextField("Song Name", text: $name)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("Singer", text: $singer)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            Button(action: {
+                onSubmit(name, singer)
+            }) {
+                Text("Submit")
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+        }
+        .frame(width: 200, height: 150)
+        .padding()
     }
 }

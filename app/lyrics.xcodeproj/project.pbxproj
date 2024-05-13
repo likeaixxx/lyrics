@@ -7,13 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6183B1602BECD44F0008EF1E /* lyricsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B15F2BECD44F0008EF1E /* lyricsApp.swift */; };
 		6183B1642BECD4510008EF1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6183B1632BECD4510008EF1E /* Assets.xcassets */; };
 		6183B1672BECD4510008EF1E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6183B1662BECD4510008EF1E /* Preview Assets.xcassets */; };
 		6183B1722BECD4510008EF1E /* lyricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B1712BECD4510008EF1E /* lyricsTests.swift */; };
 		6183B17C2BECD4510008EF1E /* lyricsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B17B2BECD4510008EF1E /* lyricsUITests.swift */; };
 		6183B17E2BECD4510008EF1E /* lyricsUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B17D2BECD4510008EF1E /* lyricsUITestsLaunchTests.swift */; };
 		6183B1982BED10E30008EF1E /* SpotifyScripting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B1972BED10E30008EF1E /* SpotifyScripting.swift */; };
+		61BD8EE42BF1B584007C8339 /* KugouKrcDecrypter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61BD8EE32BF1B584007C8339 /* KugouKrcDecrypter.swift */; };
+		61BD8EEA2BF1D71B007C8339 /* Gzip in Frameworks */ = {isa = PBXBuildFile; productRef = 61BD8EE92BF1D71B007C8339 /* Gzip */; };
+		61E15A1C2BF107E600B40B68 /* lyricsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B15F2BECD44F0008EF1E /* lyricsApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +48,7 @@
 		6183B17B2BECD4510008EF1E /* lyricsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lyricsUITests.swift; sourceTree = "<group>"; };
 		6183B17D2BECD4510008EF1E /* lyricsUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lyricsUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		6183B1972BED10E30008EF1E /* SpotifyScripting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyScripting.swift; sourceTree = "<group>"; };
+		61BD8EE32BF1B584007C8339 /* KugouKrcDecrypter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KugouKrcDecrypter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61BD8EEA2BF1D71B007C8339 /* Gzip in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,6 +106,7 @@
 				6183B1682BECD4510008EF1E /* lyrics.entitlements */,
 				6183B1652BECD4510008EF1E /* Preview Content */,
 				6183B1972BED10E30008EF1E /* SpotifyScripting.swift */,
+				61BD8EE32BF1B584007C8339 /* KugouKrcDecrypter.swift */,
 			);
 			path = lyrics;
 			sourceTree = "<group>";
@@ -147,6 +152,9 @@
 			dependencies = (
 			);
 			name = lyrics;
+			packageProductDependencies = (
+				61BD8EE92BF1D71B007C8339 /* Gzip */,
+			);
 			productName = lyrics;
 			productReference = 6183B15C2BECD44F0008EF1E /* lyrics.app */;
 			productType = "com.apple.product-type.application";
@@ -219,6 +227,9 @@
 				Base,
 			);
 			mainGroup = 6183B1532BECD44F0008EF1E;
+			packageReferences = (
+				61BD8EE82BF1D71B007C8339 /* XCRemoteSwiftPackageReference "GzipSwift" */,
+			);
 			productRefGroup = 6183B15D2BECD44F0008EF1E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -262,7 +273,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				6183B1982BED10E30008EF1E /* SpotifyScripting.swift in Sources */,
-				6183B1602BECD44F0008EF1E /* lyricsApp.swift in Sources */,
+				61BD8EE42BF1B584007C8339 /* KugouKrcDecrypter.swift in Sources */,
+				61E15A1C2BF107E600B40B68 /* lyricsApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -589,6 +601,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		61BD8EE82BF1D71B007C8339 /* XCRemoteSwiftPackageReference "GzipSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/1024jp/GzipSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		61BD8EE92BF1D71B007C8339 /* Gzip */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 61BD8EE82BF1D71B007C8339 /* XCRemoteSwiftPackageReference "GzipSwift" */;
+			productName = Gzip;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6183B1542BECD44F0008EF1E /* Project object */;
 }
