@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-var c = http.DefaultClient
+var C = http.DefaultClient
 
 func FromGinPostJson[T any](c *gin.Context) T {
 	var search T
@@ -29,10 +29,8 @@ func HttpGet[T any](urlRedirect string, headers map[string]string) (T, error) {
 		req.Header.Set(k, v)
 	}
 
-	log.Printf("%v", req)
-
 	var data T
-	resp, err := c.Do(req)
+	resp, err := C.Do(req)
 	if err != nil {
 		return data, err
 	}
@@ -66,7 +64,7 @@ func HttpPost[T any, R any](form R, url string, headers map[string]string) (T, e
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
-	resp, err := c.Do(req)
+	resp, err := C.Do(req)
 	if err != nil {
 		return data, err
 	}
