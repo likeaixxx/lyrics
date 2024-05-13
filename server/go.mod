@@ -1,6 +1,5 @@
 module lyrics
 
-// TODO ecs go version is 1.20.🥶
 go 1.20
 
 require (
