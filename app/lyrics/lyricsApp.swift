@@ -177,7 +177,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         
-        if let url = URL(string: "http://link.aiquan.fun/like-lyrics/api/v1/lyrics") {
+        if let url = URL(string: "http://localhost:8080/api/v1/lyrics") {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.httpBody = requestBody
@@ -250,7 +250,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 print("Error: Unable to encode lyricForm")
                 return
             }
-            if let url = URL(string: "http://link.aiquan.fun/like-lyrics/api/v1/lyrics/confirm") {
+            if let url = URL(string: "http://localhost:8080/api/v1/lyrics/confirm") {
                 var request = URLRequest(url: url)
                 request.httpMethod = "POST"
                 request.httpBody = requestBody
