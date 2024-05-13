@@ -235,7 +235,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         menu.addItem(NSMenuItem.separator())  // Optional separator
         menu.addItem(NSMenuItem(title: "Refresh", action: #selector(forceRefresh), keyEquivalent: "r"))
-        menu.addItem(NSMenuItem(title: "Search", action: #selector(customerInputSearch), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Research", action: #selector(customerInputSearch), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Clean Waning", action: #selector(clean), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         self.statusBarItem?.menu = menu
@@ -361,7 +361,7 @@ struct PopupView: View {
     
     var body: some View {
         VStack {
-            Text("Search")
+            Text("Research")
             TextField("Song Name", text: $name)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             TextField("Singer", text: $singer)
@@ -370,13 +370,11 @@ struct PopupView: View {
                 onSubmit(name, singer)
             }) {
                 Text("Submit")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+//                    .background(Color.blue)
+                    .foregroundColor(.blue)
             }
         }
-        .frame(width: 200, height: 150)
+        .frame(width: 150, height: 100)
         .padding()
     }
 }

@@ -16,7 +16,7 @@ func Run() {
 	group.POST("/lyrics", lyrics)
 	group.POST("/lyrics/confirm", confirm)
 
-	_ = r.Run()
+	_ = r.Run("127.0.0.1:8331")
 }
 
 func confirm(c *gin.Context) {
