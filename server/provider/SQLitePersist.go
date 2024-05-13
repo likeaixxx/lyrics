@@ -9,7 +9,6 @@ import (
 )
 
 var path = "./persist/lyrics.db"
-var Flag = "Arch"
 
 type sqlitePersist struct {
 	path string
@@ -63,7 +62,7 @@ func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRe
 			Sid:    request.Id,
 			// 获取歌词
 			Lyrics: lyrics,
-			Type:   fmt.Sprintf("%s.%s", lyricsType, Flag),
+			Type:   lyricsType,
 		})
 	}
 	return result
