@@ -12,8 +12,6 @@ import (
 	"strconv"
 )
 
-const QQMusic = "QQ Music"
-
 type QQMusicLyrics struct {
 }
 
@@ -23,7 +21,7 @@ var lyricsBaseUrl = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?s
 func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.MusicRelation {
 	var result []model.MusicRelation
 
-	data, done := search.search(request.Name + "-" + request.Singer)
+	data, done := search.search(request.Name + " " + request.Singer)
 	if done {
 		return result
 	}
@@ -62,7 +60,7 @@ func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.MusicRel
 			Sid:    request.Id,
 			// 获取歌词
 			Lyrics: lyrics,
-			Type:   QQMusic,
+			Type:   QQ,
 		})
 	}
 	return result

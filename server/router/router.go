@@ -32,6 +32,9 @@ func lyrics(c *gin.Context) {
 	}
 	if len(data) < 1 {
 		data = provider.QQMusicLyrics{}.Lyrics(request)
+		// 这个逼酷狗用不了一点
+		// data = append(data, provider.KugouMusic{}.Lyrics(request)...)
+		data = append(data, provider.NetEaseMusic{}.Lyrics(request)...)
 		if len(data) > 0 {
 			// 随机持久化一条, 后续用户点击后再更新
 			provider.Persist.Upsert(data[0])
