@@ -75,7 +75,7 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 	key, err := apputils.T2s(key)
 	log.Printf("[INFO] T2s Res " + key)
 	header := map[string]string{"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"}
-	log.Printf(fmt.Sprintf("[INFO] request endpoint %s", netEaseMusicSearch+url.QueryEscape(key)))
+	log.Printf("[INFO] request endpoint %s", netEaseMusicSearch+url.QueryEscape(key))
 	response, err := apputils.HttpGet[model.NetEaseSearchResponse](netEaseMusicSearch+url.QueryEscape(key), header)
 	if err != nil {
 		log.Printf(fmt.Sprintf("[ERROR] Failed Get NetEase Music [%s - %s]: %s", key, netEaseMusicSearch, err))
