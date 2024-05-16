@@ -63,7 +63,6 @@
 		6183B1772BECD4510008EF1E /* lyricsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = lyricsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6183B17B2BECD4510008EF1E /* lyricsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lyricsUITests.swift; sourceTree = "<group>"; };
 		6183B17D2BECD4510008EF1E /* lyricsUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lyricsUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		61BD8EE32BF1B584007C8339 /* KugouKrcDecrypter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KugouKrcDecrypter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,7 +136,6 @@
 				6183B1632BECD4510008EF1E /* Assets.xcassets */,
 				6183B1682BECD4510008EF1E /* lyrics.entitlements */,
 				6183B1652BECD4510008EF1E /* Preview Content */,
-				61BD8EE32BF1B584007C8339 /* KugouKrcDecrypter.swift */,
 			);
 			path = lyrics;
 			sourceTree = "<group>";
