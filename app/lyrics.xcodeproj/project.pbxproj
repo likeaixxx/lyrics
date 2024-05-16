@@ -7,13 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		611A1AEB2BF5DC5C00D35B14 /* LyricsMenuBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611A1AEA2BF5DC5C00D35B14 /* LyricsMenuBar.swift */; };
+		611A1B032BF5DD5E00D35B14 /* Permission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611A1AFB2BF5DD5E00D35B14 /* Permission.swift */; };
+		611A1B042BF5DD5E00D35B14 /* LyricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611A1AFC2BF5DD5E00D35B14 /* LyricsView.swift */; };
+		611A1B052BF5DD5E00D35B14 /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611A1AFD2BF5DD5E00D35B14 /* Provider.swift */; };
+		611A1B062BF5DD5E00D35B14 /* LyricsUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611A1AFE2BF5DD5E00D35B14 /* LyricsUpdater.swift */; };
+		611A1B072BF5DD5E00D35B14 /* LyricsApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611A1AFF2BF5DD5E00D35B14 /* LyricsApi.swift */; };
+		611A1B082BF5DD5E00D35B14 /* Spotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611A1B002BF5DD5E00D35B14 /* Spotify.swift */; };
+		611A1B092BF5DD5E00D35B14 /* Notify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611A1B012BF5DD5E00D35B14 /* Notify.swift */; };
+		611A1B0A2BF5DD5E00D35B14 /* Lyrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 611A1B022BF5DD5E00D35B14 /* Lyrics.swift */; };
 		6183B1642BECD4510008EF1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6183B1632BECD4510008EF1E /* Assets.xcassets */; };
 		6183B1672BECD4510008EF1E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6183B1662BECD4510008EF1E /* Preview Assets.xcassets */; };
 		6183B1722BECD4510008EF1E /* lyricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B1712BECD4510008EF1E /* lyricsTests.swift */; };
 		6183B17C2BECD4510008EF1E /* lyricsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B17B2BECD4510008EF1E /* lyricsUITests.swift */; };
 		6183B17E2BECD4510008EF1E /* lyricsUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B17D2BECD4510008EF1E /* lyricsUITestsLaunchTests.swift */; };
-		6183B1982BED10E30008EF1E /* SpotifyScripting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B1972BED10E30008EF1E /* SpotifyScripting.swift */; };
-		61BD8EE42BF1B584007C8339 /* KugouKrcDecrypter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61BD8EE32BF1B584007C8339 /* KugouKrcDecrypter.swift */; };
 		61BD8EEA2BF1D71B007C8339 /* Gzip in Frameworks */ = {isa = PBXBuildFile; productRef = 61BD8EE92BF1D71B007C8339 /* Gzip */; };
 		61E15A1C2BF107E600B40B68 /* lyricsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6183B15F2BECD44F0008EF1E /* lyricsApp.swift */; };
 /* End PBXBuildFile section */
@@ -36,6 +43,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		611A1AEA2BF5DC5C00D35B14 /* LyricsMenuBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LyricsMenuBar.swift; path = "../../../lyrics-v3/lyrics-v3/LyricsMenuBar.swift"; sourceTree = "<group>"; };
+		611A1AFB2BF5DD5E00D35B14 /* Permission.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Permission.swift; path = ../../../../../../.Trash/Core/Permission.swift; sourceTree = "<group>"; };
+		611A1AFC2BF5DD5E00D35B14 /* LyricsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LyricsView.swift; path = ../../../../../../.Trash/Core/LyricsView.swift; sourceTree = "<group>"; };
+		611A1AFD2BF5DD5E00D35B14 /* Provider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Provider.swift; path = ../../../../../../.Trash/Core/Provider.swift; sourceTree = "<group>"; };
+		611A1AFE2BF5DD5E00D35B14 /* LyricsUpdater.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LyricsUpdater.swift; path = ../../../../../../.Trash/Core/LyricsUpdater.swift; sourceTree = "<group>"; };
+		611A1AFF2BF5DD5E00D35B14 /* LyricsApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LyricsApi.swift; path = ../../../../../../.Trash/Core/LyricsApi.swift; sourceTree = "<group>"; };
+		611A1B002BF5DD5E00D35B14 /* Spotify.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Spotify.swift; path = ../../../../../../.Trash/Core/Spotify.swift; sourceTree = "<group>"; };
+		611A1B012BF5DD5E00D35B14 /* Notify.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Notify.swift; path = ../../../../../../.Trash/Core/Notify.swift; sourceTree = "<group>"; };
+		611A1B022BF5DD5E00D35B14 /* Lyrics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Lyrics.swift; path = ../../../../../../.Trash/Core/Lyrics.swift; sourceTree = "<group>"; };
 		615C59852BEF62BB00D81B37 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6183B15C2BECD44F0008EF1E /* lyrics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = lyrics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6183B15F2BECD44F0008EF1E /* lyricsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lyricsApp.swift; sourceTree = "<group>"; };
@@ -47,7 +63,6 @@
 		6183B1772BECD4510008EF1E /* lyricsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = lyricsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6183B17B2BECD4510008EF1E /* lyricsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lyricsUITests.swift; sourceTree = "<group>"; };
 		6183B17D2BECD4510008EF1E /* lyricsUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lyricsUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		6183B1972BED10E30008EF1E /* SpotifyScripting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyScripting.swift; sourceTree = "<group>"; };
 		61BD8EE32BF1B584007C8339 /* KugouKrcDecrypter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KugouKrcDecrypter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -77,6 +92,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		611A1AFA2BF5DD5200D35B14 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				611A1B022BF5DD5E00D35B14 /* Lyrics.swift */,
+				611A1AFF2BF5DD5E00D35B14 /* LyricsApi.swift */,
+				611A1AFE2BF5DD5E00D35B14 /* LyricsUpdater.swift */,
+				611A1AFC2BF5DD5E00D35B14 /* LyricsView.swift */,
+				611A1B012BF5DD5E00D35B14 /* Notify.swift */,
+				611A1AFB2BF5DD5E00D35B14 /* Permission.swift */,
+				611A1AFD2BF5DD5E00D35B14 /* Provider.swift */,
+				611A1B002BF5DD5E00D35B14 /* Spotify.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
 		6183B1532BECD44F0008EF1E = {
 			isa = PBXGroup;
 			children = (
@@ -100,12 +130,13 @@
 		6183B15E2BECD44F0008EF1E /* lyrics */ = {
 			isa = PBXGroup;
 			children = (
+				611A1AFA2BF5DD5200D35B14 /* Core */,
+				611A1AEA2BF5DC5C00D35B14 /* LyricsMenuBar.swift */,
 				615C59852BEF62BB00D81B37 /* Info.plist */,
 				6183B15F2BECD44F0008EF1E /* lyricsApp.swift */,
 				6183B1632BECD4510008EF1E /* Assets.xcassets */,
 				6183B1682BECD4510008EF1E /* lyrics.entitlements */,
 				6183B1652BECD4510008EF1E /* Preview Content */,
-				6183B1972BED10E30008EF1E /* SpotifyScripting.swift */,
 				61BD8EE32BF1B584007C8339 /* KugouKrcDecrypter.swift */,
 			);
 			path = lyrics;
@@ -272,8 +303,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6183B1982BED10E30008EF1E /* SpotifyScripting.swift in Sources */,
-				61BD8EE42BF1B584007C8339 /* KugouKrcDecrypter.swift in Sources */,
+				611A1AEB2BF5DC5C00D35B14 /* LyricsMenuBar.swift in Sources */,
+				611A1B0A2BF5DD5E00D35B14 /* Lyrics.swift in Sources */,
+				611A1B032BF5DD5E00D35B14 /* Permission.swift in Sources */,
+				611A1B062BF5DD5E00D35B14 /* LyricsUpdater.swift in Sources */,
+				611A1B052BF5DD5E00D35B14 /* Provider.swift in Sources */,
+				611A1B072BF5DD5E00D35B14 /* LyricsApi.swift in Sources */,
+				611A1B092BF5DD5E00D35B14 /* Notify.swift in Sources */,
+				611A1B042BF5DD5E00D35B14 /* LyricsView.swift in Sources */,
+				611A1B082BF5DD5E00D35B14 /* Spotify.swift in Sources */,
 				61E15A1C2BF107E600B40B68 /* lyricsApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
