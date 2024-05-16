@@ -7,9 +7,5 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>UTImportedTypeDeclarations</key>
-	<array>
-		<dict/>
-	</array>
 </dict>
 </plist>
