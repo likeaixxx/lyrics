@@ -12,9 +12,11 @@ let QQ    = "QQ Music"
 let KuGou = "KuGou Music"
 let NetEase = "NetEase Music"
 
-struct LyricLine {
-    let time: TimeInterval
+struct LyricLine: Identifiable {
+    var id = UUID()
+    let beg: TimeInterval
     let text: String
+    let end: TimeInterval
 }
 
 struct LyricResponseBody: Codable {
@@ -33,38 +35,31 @@ struct LyricResponseItem: Codable {
 }
 
 extension LyricResponseItem {
-    func parseLyrics() -> [LyricLine]? {
+
+    func parseLyrics() -> [LyricLine] {
         guard let lyricsData = Data(base64Encoded: self.lyrics),
-              let lyrics = String(data: lyricsData, encoding: .utf8)
-        else {
+              let lyrics = String(data: lyricsData, encoding: .utf8) else {
             print("Failed to decode lyrics from data.")
-            return nil
+            return []
         }
         
-        return lyrics.split(separator: "\n")
-            .map(String.init)
-            .compactMap{ lyricsLine in
-                let components = lyricsLine.components(separatedBy: "]")
-                if components.count > 1, let timeString = components.first, let text = components.last {
-                    let cleanTime = timeString.trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
-                    let timeParts = cleanTime.components(separatedBy: ":")
-                    if timeParts.count == 2 {
-                        let minutePart = timeParts[0]
-                        let secondParts = timeParts[1].components(separatedBy: ".")
-                        if secondParts.count == 2,
-                           let minutes = Int(minutePart),
-                           let seconds = Int(secondParts[0]),
-                           let milliseconds = Int(secondParts[1]) {
-                            let totalSeconds = TimeInterval(minutes * 60 + seconds) + TimeInterval(milliseconds) / 1000.0
-                            let line = text.decodeHTML()
-                            if !line.isEmpty {
-                                return LyricLine(time: totalSeconds, text: "♪ " + line)
-                            }
-                        }
-                    }
-                }
-                return nil
-            }
+        let lines = lyrics.split(separator: "\n").compactMap { lyricsLine -> LyricLine? in
+            let components = lyricsLine.components(separatedBy: "]")
+            guard components.count > 1,
+                  let timeString = components.first?.trimmingCharacters(in: CharacterSet(charactersIn: "[]")),
+                  let text = components.last,
+                  let minutes = Int(timeString.components(separatedBy: ":").first ?? ""),
+                  let seconds = Int(timeString.components(separatedBy: ":").last?.components(separatedBy: ".").first ?? ""),
+                  let milliseconds = Int(timeString.components(separatedBy: ":").last?.components(separatedBy: ".").last ?? "") else { return nil }
+            
+            let totalSeconds = TimeInterval(minutes * 60 + seconds) + TimeInterval(milliseconds) / 1000.0
+            let line = text.decodeHTML()
+            return line.isEmpty ? nil : LyricLine(beg: totalSeconds, text: line, end: TimeInterval(0))
+        }
+
+        return lines.enumerated().map { index, line in
+            LyricLine(beg: line.beg, text: line.text, end: (index + 1 < lines.count) ? lines[index + 1].beg : line.beg + 5.0)
+        }
     }
 }
 

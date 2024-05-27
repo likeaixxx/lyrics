@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		61336A322C00A8590062132C /* LyricsHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61336A312C00A8590062132C /* LyricsHUD.swift */; };
 		61E84F172BF5E40600C2B75E /* LyricsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E84F162BF5E40600C2B75E /* LyricsApp.swift */; };
 		61E84F1B2BF5E40700C2B75E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61E84F1A2BF5E40700C2B75E /* Assets.xcassets */; };
 		61E84F1E2BF5E40700C2B75E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61E84F1D2BF5E40700C2B75E /* Preview Assets.xcassets */; };
@@ -19,7 +20,23 @@
 		61E84F362BF5E55600C2B75E /* LyricsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E84F352BF5E55600C2B75E /* LyricsBar.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		61B1C7B32BFF49BB00C3C759 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		61336A312C00A8590062132C /* LyricsHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsHUD.swift; sourceTree = "<group>"; };
+		61B1C7A12BFF49BA00C3C759 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		61B1C7A32BFF49BA00C3C759 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		61E84F132BF5E40600C2B75E /* Lyrics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lyrics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61E84F162BF5E40600C2B75E /* LyricsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsApp.swift; sourceTree = "<group>"; };
 		61E84F1A2BF5E40700C2B75E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -46,10 +63,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		61B1C7A02BFF49BA00C3C759 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				61B1C7A12BFF49BA00C3C759 /* WidgetKit.framework */,
+				61B1C7A32BFF49BA00C3C759 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		61E84F0A2BF5E40600C2B75E = {
 			isa = PBXGroup;
 			children = (
 				61E84F152BF5E40600C2B75E /* Lyrics */,
+				61B1C7A02BFF49BA00C3C759 /* Frameworks */,
 				61E84F142BF5E40600C2B75E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -93,6 +120,7 @@
 				61E84F2F2BF5E4F200C2B75E /* Notify.swift */,
 				61E84F312BF5E51600C2B75E /* Provider.swift */,
 				61E84F332BF5E52500C2B75E /* Spotify.swift */,
+				61336A312C00A8590062132C /* LyricsHUD.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -107,6 +135,7 @@
 				61E84F0F2BF5E40600C2B75E /* Sources */,
 				61E84F102BF5E40600C2B75E /* Frameworks */,
 				61E84F112BF5E40600C2B75E /* Resources */,
+				61B1C7B32BFF49BB00C3C759 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -124,7 +153,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1530;
+				LastSwiftUpdateCheck = 1540;
 				LastUpgradeCheck = 1530;
 				TargetAttributes = {
 					61E84F122BF5E40600C2B75E = {
@@ -174,6 +203,7 @@
 				61E84F322BF5E51600C2B75E /* Provider.swift in Sources */,
 				61E84F362BF5E55600C2B75E /* LyricsBar.swift in Sources */,
 				61E84F2E2BF5E4D900C2B75E /* LyricsView.swift in Sources */,
+				61336A322C00A8590062132C /* LyricsHUD.swift in Sources */,
 				61E84F2C2BF5E4B800C2B75E /* API.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -234,7 +264,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -291,9 +321,10 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
@@ -302,8 +333,8 @@
 		61E84F232BF5E40700C2B75E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "";
-				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=macosx*]" = "App Icon";
+				ARCHS = "$(ARCHS_STANDARD)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Lyrics/Lyrics.entitlements;
@@ -314,11 +345,13 @@
 				DEVELOPMENT_TEAM = D8258MLS74;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Lyrics/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "I need to access Spotify to play the lyrics properly.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UILaunchStoryboardName = 1024;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -334,7 +367,8 @@
 		61E84F242BF5E40700C2B75E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				ARCHS = "$(ARCHS_STANDARD)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Lyrics/Lyrics.entitlements;
@@ -345,11 +379,13 @@
 				DEVELOPMENT_TEAM = D8258MLS74;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Lyrics/Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "I need to access Spotify to play the lyrics properly.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UILaunchStoryboardName = 1024;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
