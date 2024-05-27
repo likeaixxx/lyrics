@@ -43,7 +43,7 @@ public class LyricsHUD: NSViewController, NSWindowDelegate {
     }
 
     func setupWindow() {
-        // 创建带有标题栏的窗口,但隐藏标题文本
+        // 创建带有标题栏的窗口
         let wd = NSWindow(
             contentRect: NSRect(x: 70, y: 50, width: 400, height: 1000),
             styleMask: [.titled, .closable, .resizable],
@@ -55,6 +55,7 @@ public class LyricsHUD: NSViewController, NSWindowDelegate {
         wd.titlebarAppearsTransparent = true
         wd.level = .floating
 
+        // ---- 以下都是为了隐藏滚动条恶心的白底色
         // 创建 NSVisualEffectView
         let visualEffectView = NSVisualEffectView()
         visualEffectView.blendingMode = .behindWindow
