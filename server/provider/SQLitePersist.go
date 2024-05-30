@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var path = "./persist/lyrics.db"
+var path = "./lyrics.db"
 
 type sqlitePersist struct {
 	path string
