@@ -6,5 +6,5 @@ RUN go mod download
 COPY . .
 RUN go build -a -installsuffix cgo -o lyrics .
 RUN chmod +x lyrics
-EXPOSE 8080
+EXPOSE 8331
 CMD ["/app/lyrics"]
