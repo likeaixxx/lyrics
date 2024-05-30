@@ -6,6 +6,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"lyrics/model"
+	"os"
 )
 
 var path = "./persist/lyrics.db"
@@ -92,6 +93,18 @@ func (persist sqlitePersist) Upsert(result model.MusicRelation) {
 
 // 不管有没有用都先初始化表结构
 func (persist sqlitePersist) lyricsTable() sqlitePersist {
+	// 检查数据库文件是否存在
+	_, err := os.Stat(persist.path)
+	if os.IsNotExist(err) {
+		// 如果文件不存在，创建一个空的数据库文件
+		file, err := os.Create(persist.path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_ = file.Close()
+		log.Println("数据库文件已创建:", persist.path)
+	}
+
 	db, err := sql.Open("sqlite3", persist.path)
 	if err != nil {
 		log.Fatal(err)
