@@ -7,6 +7,7 @@ import (
 	"lyrics/model"
 	"lyrics/provider"
 	"lyrics/response"
+	"sync"
 )
 
 func Run() {
@@ -24,6 +25,8 @@ func confirm(c *gin.Context) {
 	response.Success(c)
 }
 
+var search = []provider.Provider{provider.QQMusicLyrics{}, provider.NetEaseMusic{}}
+
 func lyrics(c *gin.Context) {
 	request := apputils.FromGinPostJson[model.SearchRequest](c)
 	var data []model.MusicRelation
@@ -31,10 +34,24 @@ func lyrics(c *gin.Context) {
 		data = provider.Persist.Lyrics(request)
 	}
 	if len(data) < 1 {
-		data = provider.QQMusicLyrics{}.Lyrics(request)
-		// 这个逼酷狗用不了一点
-		// data = append(data, provider.KugouMusic{}.Lyrics(request)...)
-		data = append(data, provider.NetEaseMusic{}.Lyrics(request)...)
+		cd := make(chan []model.MusicRelation, 1)
+		var wg sync.WaitGroup
+		for _, p := range search {
+			wg.Add(1)
+			go func(p provider.Provider) {
+				defer wg.Done()
+				cd <- p.Lyrics(request)
+			}(p)
+		}
+
+		go func() {
+			wg.Wait()
+			close(cd)
+		}()
+
+		for d := range cd {
+			data = append(data, d...)
+		}
 		if len(data) > 0 {
 			// 随机持久化一条, 后续用户点击后再更新
 			provider.Persist.Upsert(data[0])
