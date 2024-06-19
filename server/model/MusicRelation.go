@@ -7,4 +7,11 @@ type MusicRelation struct {
 	Lid    string `json:"lid"`
 	Lyrics string `json:"lyrics"`
 	Type   string `json:"type"`
+	Offset int64  `json:"offset"`
+}
+
+type MusicRelationOffset struct {
+	Sid    string `json:"sid"`
+	Lid    string `json:"lid"`
+	Offset int64  `json:"offset"`
 }

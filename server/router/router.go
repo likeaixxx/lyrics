@@ -16,12 +16,18 @@ func Run() {
 	group := r.Group("/api/v1")
 	group.POST("/lyrics", lyrics)
 	group.POST("/lyrics/confirm", confirm)
+	group.POST("/lyrics/offset", offset)
 
 	_ = r.Run("0.0.0.0:8331")
 }
 
 func confirm(c *gin.Context) {
 	provider.Persist.Upsert(apputils.FromGinPostJson[model.MusicRelation](c))
+	response.Success(c)
+}
+
+func offset(c *gin.Context) {
+	provider.Persist.Offset(apputils.FromGinPostJson[model.MusicRelationOffset](c))
 	response.Success(c)
 }
 

@@ -8,8 +8,11 @@
 import Foundation
 import Combine
 
-let LYRICS = "http://localhost:8080/api/v1/lyrics"
-let CONFIRM = "http://localhost:8080/api/v1/lyrics/confirm"
+
+let DOMAIN = "http://127.0.0.1:8331"
+let LYRICS = DOMAIN + "/api/v1/lyrics"
+let CONFIRM = DOMAIN + "/api/v1/lyrics/confirm"
+let OFFSET = DOMAIN + "/api/v1/lyrics/offset"
 
 let NET_WORK_ERROR = "☹️Network Error"
 let NOTHING_FOUND = "☹️Nothing Found"
@@ -25,6 +28,12 @@ struct LyricAPI: Codable {
 
 struct ConfirmAPI: Codable {
     let item: LyricResponseItem
+}
+
+struct OffsetAPI: Codable {
+    let sid: String
+    let lid: String
+    let offset: Int64
 }
 
 extension LyricAPI {
@@ -77,6 +86,27 @@ extension ConfirmAPI {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.httpBody = try? JSONEncoder().encode(self.item)
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            let session = URLSession.shared
+            let task = session.dataTask(with: request) { data, response, error in
+                if error != nil {
+                    failure(NET_WORK_ERROR)
+                    return
+                }
+                return
+            }
+            task.resume()
+        }
+    }
+}
+
+extension OffsetAPI {
+    func offset(failure: @escaping (String) -> Void) {
+        if let url = URL(string: OFFSET) {
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = try? JSONEncoder().encode(self)
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             
             let session = URLSession.shared

@@ -41,7 +41,7 @@ struct DetailView: View {
                     Spacer() // Push content downwards
                     ForEach(lyricsManager.lyricLines) { line in
                         Text(line.text)
-                            .font(.headline)
+                            .font(.custom("Ayuthaya", size: 14))
                             .fontWeight(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .bold : .regular)
                             .foregroundColor(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .green : line.beg < lyricsManager.position ? .gray : .teal)
                             .frame(maxWidth: .infinity, alignment: .center) // 水平居中
@@ -62,5 +62,47 @@ struct DetailView: View {
                 }
             }
         }
+    }
+}
+
+struct OffsetView: View {
+    @ObservedObject var lyricsManager: LyricsManager
+    var onSubmit: (Int64) -> Void
+
+    var body: some View {
+        VStack {
+            TextField("", value: $lyricsManager.offset, formatter: NumberFormatter())
+                 .padding()
+                 .minimumScaleFactor(0.5)
+                 .textFieldStyle(RoundedBorderTextFieldStyle())
+            HStack {
+            
+                Button(action: increaseOffset) {
+                   Text("+")
+                       .foregroundColor(.blue)
+               }
+
+               Button(action: decreaseOffset) {
+                   Text("-")
+                       .foregroundColor(.blue)
+               }
+                
+                Button(action: {
+                    onSubmit(lyricsManager.offset)
+                }) {
+                    Text("Submit")
+                        .foregroundColor(.blue)
+                }
+            }
+        }
+        .padding()
+    }
+
+    func decreaseOffset() {
+        lyricsManager.offset -= 100
+    }
+
+    func increaseOffset() {
+        lyricsManager.offset += 100
     }
 }

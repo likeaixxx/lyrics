@@ -14,8 +14,10 @@ public class LyricsManager: ObservableObject {
     @Published var song: String = ""
     @Published var singer: String = ""
     @Published var lyricLines: [LyricLine] = []
+    @Published var lyricId: String = ""
     @Published var currentTrackID: String = ""
     @Published var position: Double = 0.0
+    @Published var offset: Int64 = 0
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -60,7 +62,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // 下一句
         if  let position = Provider.shared.spotify?.playerPosition {
+            print("position ---> \(position)")
+            let position = position + Double(self.lyricsManager.offset / 1000)
             self.lyricsManager.position = position
+            print("lyricsManager.position ---> \(lyricsManager.position)")
+            print("lyricsManager.offset ---> \(lyricsManager.offset)")
             
             if let lyricLine = self.lyricsManager.lyricLines.last(where:  {$0.beg <= position}) {
                 if lyricLine.text != "" {
@@ -81,6 +87,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             for (index, item) in items.enumerated() {
                 if i != nil && index == i {
                     self.lyricsManager.lyricLines = item.parseLyrics()
+                    self.lyricsManager.offset = item.offset
+                    self.lyricsManager.lyricId = item.lid
+                    print(item.offset)
                     let menuItem = NSMenuItem(title: "♪ \(item.name) - \(item.singer) | \(item.type)", action: nil, keyEquivalent: "")
                     menu.addItem(menuItem)
                 } else {
@@ -96,6 +105,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             menu.addItem(NSMenuItem(title: "Lyrics Window", action: #selector(hud), keyEquivalent: "o"))
             menu.addItem(NSMenuItem(title: "Report", action: #selector(clean), keyEquivalent: ""))
             menu.addItem(NSMenuItem(title: "Research", action: #selector(search), keyEquivalent: "f"))
+            menu.addItem(NSMenuItem(title: "Offset", action: #selector(offset), keyEquivalent: ""))
             menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
             self.statusBarItem?.menu = menu
         }
@@ -136,8 +146,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func updateBarTitle(message: String) {
+        let font = NSFont(name: "Ayuthaya", size: 13) ?? NSFont.systemFont(ofSize: 13)
+        let attributedTitle = NSAttributedString(string: message, attributes: [NSAttributedString.Key.font: font])
         DispatchQueue.main.async {
-            self.statusBarItem?.button?.title = message
+            self.statusBarItem?.button?.attributedTitle = attributedTitle
         }
     }
     
@@ -162,6 +174,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                  name: self.lyricsManager.song,
                  singer: self.lyricsManager.singer
             )
+            popover.contentViewController = NSHostingController(rootView: contentView)
+            popover.show(relativeTo: statusItem.button!.bounds, of: statusItem.button!, preferredEdge: .minY)
+        }
+    }
+    
+    @objc func offset() {
+        guard let statusItem = self.statusBarItem else { return }
+        let popover = NSPopover()
+        popover.behavior = .transient
+        if popover.isShown {
+            popover.performClose(nil)
+        } else {
+            let contentView = OffsetView(
+                lyricsManager: self.lyricsManager) { offset in
+                    OffsetAPI(sid: self.lyricsManager.currentTrackID, lid: self.lyricsManager.lyricId, offset: offset)
+                        .offset { message in
+                            self.updateBarTitle(message: message)
+                        }
+                }
             popover.contentViewController = NSHostingController(rootView: contentView)
             popover.show(relativeTo: statusItem.button!.bounds, of: statusItem.button!, preferredEdge: .minY)
         }

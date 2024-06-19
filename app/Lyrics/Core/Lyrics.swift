@@ -32,6 +32,7 @@ struct LyricResponseItem: Codable {
     let lid: String
     let lyrics: String
     let type: String
+    let offset: Int64
 }
 
 extension LyricResponseItem {
@@ -72,5 +73,7 @@ extension String {
             .replacingOccurrences(of: "&lt;", with: "<")
             .replacingOccurrences(of: "&gt;", with: ">")
             .replacingOccurrences(of: "&amp;", with: "&")
+            .replacingOccurrences(of: "\n", with: "")
+            .replacingOccurrences(of: "\t", with: "")
     }
 }

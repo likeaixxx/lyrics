@@ -36,7 +36,7 @@ func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRe
 	}(db)
 
 	search := `
-      select relation_id, name, singer, lyrics_content, lyrics_type from lyrics_relation where spotify_id = ?
+      select relation_id, name, singer, lyrics_content, lyrics_type, offset from lyrics_relation where spotify_id = ?
 	`
 
 	row, err := db.Query(search, request.Id)
@@ -51,7 +51,8 @@ func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRe
 		var singer string
 		var lyrics string
 		var lyricsType string
-		err := row.Scan(&mid, &name, &singer, &lyrics, &lyricsType)
+		var offset int64
+		err := row.Scan(&mid, &name, &singer, &lyrics, &lyricsType, &offset)
 		if err != nil {
 			log.Printf("[ERROR] Failed Scan Row %s", err)
 			continue
@@ -64,6 +65,7 @@ func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRe
 			// 获取歌词
 			Lyrics: lyrics,
 			Type:   lyricsType,
+			Offset: offset,
 		})
 	}
 	return result
@@ -89,6 +91,19 @@ func (persist sqlitePersist) Upsert(result model.MusicRelation) {
 	if err != nil {
 		log.Printf(fmt.Sprintf("[ERROR] Failed Insert/Update %s", err))
 	}
+}
+
+func (persist sqlitePersist) Offset(offset model.MusicRelationOffset) {
+	db, err := sql.Open("sqlite3", persist.path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func(db *sql.DB) {
+		_ = db.Close()
+	}(db)
+	updateOffset := `update lyrics_relation set offset = ? where spotify_id = ? and relation_id = ?`
+	_, err = db.Exec(updateOffset, offset.Offset, offset.Sid, offset.Lid)
+	panic(err)
 }
 
 // 不管有没有用都先初始化表结构
@@ -121,6 +136,7 @@ func (persist sqlitePersist) lyricsTable() sqlitePersist {
 			singer text,
 			lyrics_content TEXT, 
 			lyrics_type TEXT,
+			offset integer default 0,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
