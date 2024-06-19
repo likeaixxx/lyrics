@@ -68,6 +68,7 @@ func (search NetEaseMusic) Lyrics(request model.SearchRequest) []model.MusicRela
 			// 获取歌词
 			Lyrics: encoding.EncodeToString([]byte(lyrics)),
 			Type:   NetEase,
+			Offset: 0,
 		})
 	}
 	return result

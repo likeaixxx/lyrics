@@ -61,6 +61,7 @@ func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.MusicRel
 			// 获取歌词
 			Lyrics: lyrics,
 			Type:   QQ,
+			Offset: 0,
 		})
 	}
 	return result

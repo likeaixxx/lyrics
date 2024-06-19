@@ -68,6 +68,7 @@ func (search KugouMusic) Lyrics(request model.SearchRequest) []model.MusicRelati
 				// 获取歌词
 				Lyrics: lyrics,
 				Type:   KuGou,
+				Offset: 0,
 			})
 		}
 
