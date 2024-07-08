@@ -132,7 +132,7 @@ func (persist sqlitePersist) lyricsTable() sqlitePersist {
 
 	lyricsDB := `
 			-- auto-generated definition
-			create table lyrics_relation
+			create table if not exists lyrics_relation
 			(
 				spotify_id     TEXT primary key,
 				relation_id    TEXT,
