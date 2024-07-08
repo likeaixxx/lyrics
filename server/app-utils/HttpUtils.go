@@ -46,6 +46,7 @@ func HttpGet[T any](urlRedirect string, headers map[string]string) (T, error) {
 		log.Println(err)
 		return data, errors.New("Not Format JSON [" + string(body) + "]")
 	}
+	// log.Printf("Format Json %s\n", string(body))
 	return data, nil
 }
 

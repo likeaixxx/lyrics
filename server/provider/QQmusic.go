@@ -59,7 +59,8 @@ func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.MusicRel
 			Lid:    song.Mid,
 			Sid:    request.Id,
 			// 获取歌词
-			Lyrics: lyrics,
+			Lyrics: lyrics.Lyric,
+			Trans:  lyrics.Trans,
 			Type:   QQ,
 			Offset: 0,
 		})
@@ -87,14 +88,14 @@ func (search QQMusicLyrics) search(source string) (model.QQMusicSearch, bool) {
 	return data, false
 }
 
-func (search QQMusicLyrics) lyrics(mid string) (string, error) {
+func (search QQMusicLyrics) lyrics(mid string) (model.QQMusicLyrics, error) {
 	headers := map[string]string{"referer": "https://y.qq.com/portal/player.html"}
 	data, err := app_utils.HttpGet[model.QQMusicLyrics](fmt.Sprintf(lyricsBaseUrl, mid), headers)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("[ERROR] Failed Get QQMusic Lyrics [%s - %s]: %s", mid, lyricsBaseUrl, err))
+		return model.QQMusicLyrics{}, errors.New(fmt.Sprintf("[ERROR] Failed Get QQMusic Lyrics [%s - %s]: %s", mid, lyricsBaseUrl, err))
 	}
 	if data.Code != 0 {
-		return "", errors.New(fmt.Sprintf("[ERROR] Failed to get lyrics for Music [%s - %s]", mid, strconv.Itoa(data.Code)))
+		return model.QQMusicLyrics{}, errors.New(fmt.Sprintf("[ERROR] Failed to get lyrics for Music [%s - %s]", mid, strconv.Itoa(data.Code)))
 	}
-	return data.Lyric, nil
+	return data, nil
 }

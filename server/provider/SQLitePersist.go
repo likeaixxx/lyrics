@@ -36,7 +36,7 @@ func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRe
 	}(db)
 
 	search := `
-      select relation_id, name, singer, lyrics_content, lyrics_type, offset from lyrics_relation where spotify_id = ?
+      select relation_id, name, singer, lyrics_content, lyrics_trans, lyrics_type, offset from lyrics_relation where spotify_id = ?
 	`
 
 	row, err := db.Query(search, request.Id)
@@ -50,9 +50,10 @@ func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRe
 		var name string
 		var singer string
 		var lyrics string
+		var trans string
 		var lyricsType string
 		var offset int64
-		err := row.Scan(&mid, &name, &singer, &lyrics, &lyricsType, &offset)
+		err := row.Scan(&mid, &name, &singer, &lyrics, &trans, &lyricsType, &offset)
 		if err != nil {
 			log.Printf("[ERROR] Failed Scan Row %s", err)
 			continue
@@ -64,6 +65,7 @@ func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRe
 			Sid:    request.Id,
 			// 获取歌词
 			Lyrics: lyrics,
+			Trans:  trans,
 			Type:   lyricsType,
 			Offset: offset,
 		})
@@ -82,12 +84,12 @@ func (persist sqlitePersist) Upsert(result model.MusicRelation) {
 
 	insert := `
 		INSERT OR REPLACE INTO lyrics_relation 
-		    (spotify_id, relation_id, name, singer, lyrics_content, lyrics_type, updated_at)
+		    (spotify_id, relation_id, name, singer, lyrics_content, lyrics_trans, lyrics_type)
 		VALUES 
-			(?, ?, ?, ?, ?, ?, current_timestamp)
+			(?, ?, ?, ?, ?, ?, ?)
 	`
 
-	_, err = db.Exec(insert, result.Sid, result.Lid, result.Name, result.Singer, result.Lyrics, result.Type)
+	_, err = db.Exec(insert, result.Sid, result.Lid, result.Name, result.Singer, result.Lyrics, result.Trans, result.Type)
 	if err != nil {
 		log.Printf(fmt.Sprintf("[ERROR] Failed Insert/Update %s", err))
 	}
@@ -129,17 +131,19 @@ func (persist sqlitePersist) lyricsTable() sqlitePersist {
 	}(db)
 
 	lyricsDB := `
-		CREATE TABLE IF NOT EXISTS lyrics_relation (
-			spotify_id TEXT PRIMARY KEY, 
-			relation_id TEXT, 
-			name text,
-			singer text,
-			lyrics_content TEXT, 
-			lyrics_type TEXT,
-			offset integer default 0,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		);
+			-- auto-generated definition
+			create table lyrics_relation
+			(
+				spotify_id     TEXT primary key,
+				relation_id    TEXT,
+				name           text,
+				singer         text,
+				lyrics_content TEXT,
+				lyrics_trans   TEXT,
+				lyrics_type    TEXT,
+				offset         integer,
+				created_at     TIMESTAMP default CURRENT_TIMESTAMP
+			);
 	`
 	_, err = db.Exec(lyricsDB)
 	if err != nil {

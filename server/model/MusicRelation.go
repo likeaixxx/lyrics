@@ -6,6 +6,7 @@ type MusicRelation struct {
 	Sid    string `json:"sid"`
 	Lid    string `json:"lid"`
 	Lyrics string `json:"lyrics"`
+	Trans  string `json:"trans"`
 	Type   string `json:"type"`
 	Offset int64  `json:"offset"`
 }
