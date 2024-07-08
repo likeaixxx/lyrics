@@ -141,7 +141,7 @@ func (persist sqlitePersist) lyricsTable() sqlitePersist {
 				lyrics_content TEXT,
 				lyrics_trans   TEXT,
 				lyrics_type    TEXT,
-				offset         integer,
+				offset integer default 0,
 				created_at     TIMESTAMP default CURRENT_TIMESTAMP
 			);
 	`
