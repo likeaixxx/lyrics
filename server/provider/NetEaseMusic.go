@@ -59,6 +59,9 @@ func (search NetEaseMusic) Lyrics(request model.SearchRequest) []model.MusicRela
 			log.Printf(err.Error())
 			continue
 		}
+		if lyrics == "" {
+			continue
+		}
 		encoding := base64.StdEncoding
 		result = append(result, model.MusicRelation{
 			Name:   song.Name,
