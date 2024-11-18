@@ -45,16 +45,8 @@ func (search NetEaseMusic) Lyrics(request model.SearchRequest) []model.MusicRela
 				return result
 			}
 			data, done = search.search(request.Name[:minIndex])
-			if len(data.Result.Songs) > 0 {
-				log.Printf("from replace [%s]", request.Name[:minIndex])
-			}
-		} else {
-			log.Printf("from song name [%s]", request.Name)
 		}
-	} else {
-		log.Printf("from name and singer [%s]", request.Name)
 	}
-
 	for _, song := range data.Result.Songs {
 		var singer string
 		for _, artist := range song.Artists {
