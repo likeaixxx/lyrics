@@ -18,7 +18,7 @@ func Run() {
 	group.POST("/lyrics/confirm", confirm)
 	group.POST("/lyrics/offset", offset)
 
-	_ = r.Run("0.0.0.0:8331")
+	_ = r.Run("127.0.0.1:8331")
 }
 
 func confirm(c *gin.Context) {
@@ -31,7 +31,8 @@ func offset(c *gin.Context) {
 	response.Success(c)
 }
 
-var search = []provider.Provider{provider.QQMusicLyrics{}, provider.NetEaseMusic{}}
+// 俺也不知道网易云音乐抽什么风 provider.NetEaseMusic{}
+var search = []provider.Provider{provider.QQMusicLyrics{}}
 
 func lyrics(c *gin.Context) {
 	request := apputils.FromGinPostJson[model.SearchRequest](c)
