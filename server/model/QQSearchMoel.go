@@ -52,16 +52,18 @@ type QQMusicSearchSinger struct {
 	Type  int    `json:"type"`
 }
 
+type QQMusicItem struct {
+	Docid  string `json:"docid"`
+	ID     string `json:"id"`
+	Mid    string `json:"mid"`
+	Name   string `json:"name"`
+	Singer string `json:"singer"`
+}
+
 type QQMusicSearchSong struct {
-	Count    int `json:"count"`
-	Itemlist []struct {
-		Docid  string `json:"docid"`
-		ID     string `json:"id"`
-		Mid    string `json:"mid"`
-		Name   string `json:"name"`
-		Singer string `json:"singer"`
-	} `json:"itemlist"`
-	Name  string `json:"name"`
-	Order int    `json:"order"`
-	Type  int    `json:"type"`
+	Count    int           `json:"count"`
+	Itemlist []QQMusicItem `json:"itemlist"`
+	Name     string        `json:"name"`
+	Order    int           `json:"order"`
+	Type     int           `json:"type"`
 }

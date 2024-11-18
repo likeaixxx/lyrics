@@ -21,32 +21,32 @@ var lyricsBaseUrl = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?s
 func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.MusicRelation {
 	var result []model.MusicRelation
 
+	var itemList []model.QQMusicItem
+
 	data, done := search.search(request.Name + " " + request.Singer)
-	if done {
-		return result
+	if !done {
+		itemList = append(itemList, data.Data.Song.Itemlist...)
+	}
+	data, done = search.search(request.Name)
+	if !done {
+		itemList = append(itemList, data.Data.Song.Itemlist...)
 	}
 
-	if len(data.Data.Song.Itemlist) < 1 {
-		data, done = search.search(request.Name)
-		if done {
-			return result
+	split := []string{"(", "（", "-", "《"}
+	minIndex := len(request.Name)
+	for _, sep := range split {
+		if idx := strings.Index(request.Name, sep); idx != -1 && idx < minIndex {
+			minIndex = idx
 		}
-		if len(data.Data.Song.Itemlist) < 1 {
-			split := []string{"(", "（", "-", "《"}
-			minIndex := len(request.Name)
-			for _, sep := range split {
-				if idx := strings.Index(request.Name, sep); idx != -1 && idx < minIndex {
-					minIndex = idx
-				}
-			}
-			if minIndex == len(request.Name) {
-				return result
-			}
-			data, done = search.search(request.Name[:minIndex])
+	}
+	if minIndex != len(request.Name) {
+		data, done = search.search(request.Name[:minIndex])
+		if !done {
+			itemList = append(itemList, data.Data.Song.Itemlist...)
 		}
 	}
 
-	for _, song := range data.Data.Song.Itemlist {
+	for _, song := range itemList {
 		log.Printf(fmt.Sprintf("[INFO] GET Song [%s - %s], MusicId [%s, %s]", song.Name, song.Singer, song.Mid, request.Id))
 		lyrics, err := search.lyrics(song.Mid)
 		if err != nil {
