@@ -87,9 +87,7 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 	params.Add("limit", "10")
 	params.Add("type", "1")
 	queryUrl := netEaseMusicSearch + "?" + params.Encode()
-
-	escape := url.QueryEscape(netEaseMusicSearch + key)
-	log.Printf("[INFO] NETEASE escape URL %s", escape)
+	log.Printf("[INFO] NETEASE escape URL %s", queryUrl)
 
 	headers := map[string]string{
 		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15",
