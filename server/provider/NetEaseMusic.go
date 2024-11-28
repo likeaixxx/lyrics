@@ -90,6 +90,20 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 	log.Printf("[INFO] NETEASE escape URL %s", queryUrl)
 
 	headers := map[string]string{
+		"sec-ch-ua":                 "\"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+		"sec-ch-ua-mobile":          "?0",
+		"sec-ch-ua-platform":        "\"macOS\"",
+		"sec-fetch-dest":            "document",
+		"sec-fetch-mode":            "navigate",
+		"sec-fetch-user":            "?1",
+		"upgrade-insecure-requests": "1",
+		"priority":                  "u=0, i",
+		"dnt":                       "1",
+		"accept-language":           "zh-CN,zh;q=0.9",
+		"accept-encoding":           "gzip, deflate, br, zstd",
+		"cache-control":             "max-age=0",
+		// ":scheme":                   "https",
+		":authority": "music.163.com",
 		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15",
 		// "Cookie":     cookie[:strings.Index(cookie, ";")],
 	}
