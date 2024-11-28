@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"lyrics/router"
 )
 
 func init() {
@@ -12,5 +11,5 @@ func init() {
 }
 
 func main() {
-	router.Run()
+	Run()
 }
