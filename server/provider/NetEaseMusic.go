@@ -81,8 +81,13 @@ func (search NetEaseMusic) Lyrics(request model.SearchRequest) []model.MusicRela
 
 func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool) {
 	key, err := apputils.T2s(key)
-	log.Printf("[INFO] T2s Res " + key)
+
 	queryUrl := netEaseMusicSearch + url.QueryEscape(key)
+	escape := url.QueryEscape(netEaseMusicSearch + key)
+	log.Printf("[INFO] NETEASE query URL " + queryUrl)
+
+	log.Printf("[INFO] NETEASE escape URL " + escape)
+
 	headers := map[string]string{
 		"Referer":    "https://music.163.com/",
 		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15",
