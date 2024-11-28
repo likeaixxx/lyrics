@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-var netEaseMusicSearch = "https://music.163.com/api/search/pc"
+var netEaseMusicSearch = "http://music.163.com/api/search/pc"
 var netEaseLyrics = "https://music.163.com/api/song/media?id=%d"
 
 type NetEaseMusic struct{}
@@ -82,26 +82,27 @@ func (search NetEaseMusic) Lyrics(request model.SearchRequest) []model.MusicRela
 func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool) {
 	key, err := apputils.T2s(key)
 	params := url.Values{}
-	params.Add("s", key)
 	params.Add("offset", "0")
 	params.Add("limit", "10")
 	params.Add("type", "1")
+	params.Add("s", key)
 	queryUrl := netEaseMusicSearch + "?" + params.Encode()
 	log.Printf("[INFO] NETEASE escape URL %s", queryUrl)
 
 	headers := map[string]string{
-		"sec-ch-ua":                 "\"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
-		"sec-ch-ua-mobile":          "?0",
-		"sec-ch-ua-platform":        "\"macOS\"",
-		"sec-fetch-dest":            "document",
-		"sec-fetch-mode":            "navigate",
-		"sec-fetch-user":            "?1",
-		"upgrade-insecure-requests": "1",
-		"priority":                  "u=0, i",
-		"dnt":                       "1",
-		"accept-language":           "zh-CN,zh;q=0.9",
-		"accept-encoding":           "gzip, deflate, br, zstd",
-		"cache-control":             "max-age=0",
+		// "sec-ch-ua":                 "\"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+		// "sec-ch-ua-mobile":          "?0",
+		// "sec-ch-ua-platform":        "\"macOS\"",
+		// "sec-fetch-dest":            "document",
+		// "sec-fetch-mode":            "navigate",
+		// "sec-fetch-user":            "?1",
+		// "upgrade-insecure-requests": "1",
+		// "priority":                  "u=0, i",
+		// "dnt":                       "1",
+		// "accept-language":           "zh-CN,zh;q=0.9",
+		// "accept-encoding":           "gzip, deflate, br, zstd",
+		// "cache-control":             "max-age=0",
+		"Referer": "http://music.163.com/",
 		// ":scheme":                   "https",
 		// ":authority": "music.163.com",
 		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15",
