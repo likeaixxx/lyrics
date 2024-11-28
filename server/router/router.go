@@ -32,7 +32,7 @@ func offset(c *gin.Context) {
 }
 
 // 俺也不知道网易云音乐抽什么风 provider.NetEaseMusic{}
-var search = []provider.Provider{provider.QQMusicLyrics{}, provider.NetEaseMusic{}}
+var search = []provider.Provider{provider.QQMusicLyrics{}}
 
 func lyrics(c *gin.Context) {
 	request := apputils.FromGinPostJson[model.SearchRequest](c)
