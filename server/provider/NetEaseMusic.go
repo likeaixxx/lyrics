@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-var netEaseMusicSearch = "https://music.163.com/api/search/pc?offset=0&limit=10&type=1&s="
+var netEaseMusicSearch = "https://music.163.com/api/search/pc"
 var netEaseLyrics = "https://music.163.com/api/song/media?id=%d"
 
 type NetEaseMusic struct{}
@@ -83,9 +83,18 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 	key, err := apputils.T2s(key)
 
 	queryUrl := netEaseMusicSearch + url.QueryEscape(key)
-	escape := url.QueryEscape(netEaseMusicSearch + key)
 	log.Printf("[INFO] NETEASE query URL " + queryUrl)
 
+	baseURL := "https://music.163.com/api/search/pc"
+	params := url.Values{}
+	params.Add("s", key)
+	params.Add("offset", "0")
+	params.Add("limit", "10")
+	params.Add("type", "1")
+	fullURL := baseURL + "?" + params.Encode()
+	log.Printf("[INFO] NETEASE full URL " + fullURL)
+
+	escape := url.QueryEscape(netEaseMusicSearch + key)
 	log.Printf("[INFO] NETEASE escape URL " + escape)
 
 	headers := map[string]string{
