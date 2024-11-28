@@ -83,7 +83,7 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 	key, err := apputils.T2s(key)
 
 	queryUrl := netEaseMusicSearch + url.QueryEscape(key)
-	log.Printf("[INFO] NETEASE query URL " + queryUrl)
+	log.Printf("[INFO] NETEASE query URL  %s", queryUrl)
 
 	baseURL := "https://music.163.com/api/search/pc"
 	params := url.Values{}
@@ -92,10 +92,10 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 	params.Add("limit", "10")
 	params.Add("type", "1")
 	fullURL := baseURL + "?" + params.Encode()
-	log.Printf("[INFO] NETEASE full URL " + fullURL)
+	log.Printf("[INFO] NETEASE full URL %s", fullURL)
 
 	escape := url.QueryEscape(netEaseMusicSearch + key)
-	log.Printf("[INFO] NETEASE escape URL " + escape)
+	log.Printf("[INFO] NETEASE escape URL %s", escape)
 
 	headers := map[string]string{
 		"Referer":    "https://music.163.com/",
