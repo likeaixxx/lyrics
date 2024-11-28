@@ -114,7 +114,7 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 		log.Printf("[ERROR] GET Cookie Failed NetEase Music Search Error")
 		return response, true
 	}
-	headers["Cookie"] = cookie[:strings.Index(cookie, ";")]
+	headers["Cookie"] = cookie
 	response, err = apputils.HttpGet[model.NetEaseSearchResponse](queryUrl, headers)
 	if err != nil {
 		log.Printf("[ERROR] Failed Get NetEase Music [%s - %s]: %s", key, queryUrl, err)
