@@ -103,7 +103,7 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 		"accept-encoding":           "gzip, deflate, br, zstd",
 		"cache-control":             "max-age=0",
 		// ":scheme":                   "https",
-		":authority": "music.163.com",
+		// ":authority": "music.163.com",
 		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15",
 		// "Cookie":     cookie[:strings.Index(cookie, ";")],
 	}
