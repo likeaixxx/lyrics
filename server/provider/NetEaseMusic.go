@@ -105,7 +105,7 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 
 	var response model.NetEaseSearchResponse
 
-	req, err := http.NewRequest("GET", queryUrl, nil)
+	req, err := http.NewRequest("GET", fullURL, nil)
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
