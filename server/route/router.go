@@ -18,7 +18,7 @@ func Run() {
 	group.POST("/lyrics/confirm", confirm)
 	group.POST("/lyrics/offset", offset)
 
-	_ = r.Run("0.0.0.0:8331")
+	_ = r.Run("[::]:8331")
 }
 
 func confirm(c *gin.Context) {
