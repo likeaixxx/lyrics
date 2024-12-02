@@ -1,18 +1,18 @@
 # Build stage
 FROM golang AS builder
 WORKDIR /build
-# Copy only dependency files first
 COPY go.mod go.sum ./
 RUN go mod download
-# Copy source code
 COPY . .
-# Build with optimizations
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o lyrics .
 
 # Final stage
-FROM scratch
+FROM alpine:latest
 
 WORKDIR /app
+
+# Install certificates
+RUN apk --no-cache add ca-certificates
 
 # Copy binary from builder
 COPY --from=builder /build/lyrics .
