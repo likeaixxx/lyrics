@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"lyrics/route"
 )
 
 func init() {
@@ -11,5 +12,5 @@ func init() {
 }
 
 func main() {
-	Run()
+	route.Run()
 }
