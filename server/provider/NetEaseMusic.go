@@ -1,6 +1,5 @@
 package provider
 
-import "C"
 import (
 	"encoding/base64"
 	"errors"
