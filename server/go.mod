@@ -2,8 +2,6 @@ module lyrics
 
 go 1.23.3
 
-toolchain go1.23.3
-
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/liuzl/gocc v0.0.0-20231231122217-0372e1059ca5

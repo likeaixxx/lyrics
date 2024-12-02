@@ -27,7 +27,7 @@ func persistProvider() sqlitePersist {
 func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRelation {
 	var result []model.MusicRelation
 
-	db, err := sql.Open("sqlite3", persist.path)
+	db, err := sql.Open("sqlite", persist.path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func (persist sqlitePersist) Lyrics(request model.SearchRequest) []model.MusicRe
 }
 
 func (persist sqlitePersist) Upsert(result model.MusicRelation) {
-	db, err := sql.Open("sqlite3", persist.path)
+	db, err := sql.Open("sqlite", persist.path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func (persist sqlitePersist) Upsert(result model.MusicRelation) {
 }
 
 func (persist sqlitePersist) Offset(offset model.MusicRelationOffset) {
-	db, err := sql.Open("sqlite3", persist.path)
+	db, err := sql.Open("sqlite", persist.path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,7 +122,7 @@ func (persist sqlitePersist) lyricsTable() sqlitePersist {
 		log.Println("数据库文件已创建:", persist.path)
 	}
 
-	db, err := sql.Open("sqlite3", persist.path)
+	db, err := sql.Open("sqlite", persist.path)
 	if err != nil {
 		log.Fatal(err)
 	}
