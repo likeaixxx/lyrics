@@ -3,9 +3,9 @@ package provider
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"lyrics/model"
+	_ "modernc.org/sqlite"
 	"os"
 )
 
