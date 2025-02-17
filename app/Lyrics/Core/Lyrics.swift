@@ -16,6 +16,7 @@ struct LyricLine: Identifiable {
     var id = UUID()
     let beg: TimeInterval
     let text: String
+    let tran: String
     let end: TimeInterval
 }
 
@@ -31,36 +32,53 @@ struct LyricResponseItem: Codable {
     let sid: String
     let lid: String
     let lyrics: String
+    let trans: String
     let type: String
     let offset: Int64
 }
 
 extension LyricResponseItem {
-
-    func parseLyrics() -> [LyricLine] {
+    func Lyrics() -> [LyricLine] {
         guard let lyricsData = Data(base64Encoded: self.lyrics),
               let lyrics = String(data: lyricsData, encoding: .utf8) else {
-            print("Failed to decode lyrics from data.")
+            print("Failed to decode lyrics from data. \(self.lyrics)")
             return []
         }
         
-        let lines = lyrics.split(separator: "\n").compactMap { lyricsLine -> LyricLine? in
-            let components = lyricsLine.components(separatedBy: "]")
-            guard components.count > 1,
-                  let timeString = components.first?.trimmingCharacters(in: CharacterSet(charactersIn: "[]")),
-                  let text = components.last,
+        let transData = Data(base64Encoded: self.trans)
+        let trans = String(data: transData ?? Data(), encoding: .utf8)
+        
+        let lyricsLines = lyrics.components(separatedBy: "[")
+        let transLines = trans?.components(separatedBy: "[") ?? []
+        
+        var result = [LyricLine]()
+        
+        for (index, lyricsLine) in lyricsLines.enumerated() {
+            let lyricsComponents = lyricsLine.components(separatedBy: "]")
+            let transComponents = index < transLines.count ? transLines[index].components(separatedBy: "]") : []
+            
+            guard lyricsComponents.count > 1,
+                  let timeString = lyricsComponents.first?.trimmingCharacters(in: CharacterSet(charactersIn: "[]")),
+                  let text = lyricsComponents.last,
                   let minutes = Int(timeString.components(separatedBy: ":").first ?? ""),
                   let seconds = Int(timeString.components(separatedBy: ":").last?.components(separatedBy: ".").first ?? ""),
-                  let milliseconds = Int(timeString.components(separatedBy: ":").last?.components(separatedBy: ".").last ?? "") else { return nil }
+                  let milliseconds = Int(timeString.components(separatedBy: ":").last?.components(separatedBy: ".").last ?? "") else { continue }
             
             let totalSeconds = TimeInterval(minutes * 60 + seconds) + TimeInterval(milliseconds) / 1000.0
             let line = text.decodeHTML()
-            return line.isEmpty ? nil : LyricLine(beg: totalSeconds, text: line, end: TimeInterval(0))
+            let tran = index < transLines.count ? (transComponents.last?.decodeHTML() ?? "") : ""
+            
+            if !line.isEmpty {
+                let nextTimeString = index + 1 < lyricsLines.count ? lyricsLines[index + 1].components(separatedBy: "]").first : nil
+                let nextMinutes = Int(nextTimeString?.components(separatedBy: ":").first ?? "") ?? minutes
+                let nextSeconds = Int(nextTimeString?.components(separatedBy: ":").last?.components(separatedBy: ".").first ?? "") ?? seconds
+                let nextMilliseconds = Int(nextTimeString?.components(separatedBy: ":").last?.components(separatedBy: ".").last ?? "") ?? milliseconds
+                let nextTotalSeconds = TimeInterval(nextMinutes * 60 + nextSeconds) + TimeInterval(nextMilliseconds) / 1000.0
+                let end = (index + 1 < lyricsLines.count) ? nextTotalSeconds : totalSeconds + 5.0
+                result.append(LyricLine(beg: totalSeconds, text: line, tran: tran, end: end))
+            }
         }
-
-        return lines.enumerated().map { index, line in
-            LyricLine(beg: line.beg, text: line.text, end: (index + 1 < lines.count) ? lines[index + 1].beg : line.beg + 5.0)
-        }
+        return result
     }
 }
 
@@ -74,6 +92,9 @@ extension String {
             .replacingOccurrences(of: "&gt;", with: ">")
             .replacingOccurrences(of: "&amp;", with: "&")
             .replacingOccurrences(of: "\n", with: "")
+            .replacingOccurrences(of: "\r", with: "")
             .replacingOccurrences(of: "\t", with: "")
+            .replacingOccurrences(of: "//", with: "")
+            .replacingOccurrences(of: "\\", with: "")
     }
 }

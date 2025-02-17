@@ -33,7 +33,7 @@ struct ConfirmAPI: Codable {
 struct OffsetAPI: Codable {
     let sid: String
     let lid: String
-    let offset: Int64
+    let offset: Int64?
 }
 
 extension LyricAPI {

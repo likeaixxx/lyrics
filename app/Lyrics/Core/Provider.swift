@@ -11,7 +11,7 @@ class Provider {
     static let shared = Provider()
     var spotify: SpotifyApplication? = {
         guard let app = SBApplication(bundleIdentifier: "com.spotify.client") else {
-            print("Not Get Spotify Proxy")
+            print("Failed to get Spotify proxy")
             return nil
         }
         return app
@@ -26,27 +26,32 @@ class Provider {
         return true
     }
     
-    func next(currentTrackID: String?)-> SpotifyTrack? {
-        print("verify next")
-        
+    func next(currentTrackID: String?) -> SpotifyTrack? {
         guard let spotify = self.spotify,
               let _ = spotify.currentTrack?.name,
               spotify.playerState == .playing else {
-            print("NOT Playing \(spotify?.playerState ?? .unknown)")
+            print("Not playing \(spotify?.playerState ?? .unknown)")
             return nil
         }
         
-        guard let currentTrack = self.spotify?.currentTrack else {
-            print("Not Get Current Track")
+        guard let currentTrack = spotify.currentTrack else {
+            print("Failed to get current track")
             return nil
         }
+        
         let id = currentTrack.id?()
-        print("Current Track Id \(id ?? "")")
-        if  id != currentTrackID {
-            print("Current Track Id \(id ?? "") and Cached Id \(currentTrackID ?? "")")
+        if id != currentTrackID {
+            // Refresh Spotify application instance
+            self.spotify = {
+                guard let app = SBApplication(bundleIdentifier: "com.spotify.client") else {
+                    print("Failed to get Spotify proxy")
+                    return nil
+                }
+                return app
+            }()
             return currentTrack
         }
-        print("Current Track Id ... and Cached Id \(currentTrackID ?? "")")
         return nil
     }
 }
+

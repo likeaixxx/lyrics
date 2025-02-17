@@ -4,7 +4,6 @@
 //
 //  Created by 陈爱全 on 2024/5/16.
 //
-
 import SwiftUI
 
 struct SearchView: View {
@@ -38,16 +37,25 @@ struct DetailView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(spacing: 10) {
-                    Spacer() // Push content downwards
+                    Spacer()
                     ForEach(lyricsManager.lyricLines) { line in
                         Text(line.text)
-                            .font(.custom("Ayuthaya", size: 14))
+                            // .font(.custom("Hannotate SC", size: 18))
                             .fontWeight(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .bold : .regular)
                             .foregroundColor(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .green : line.beg < lyricsManager.position ? .gray : .teal)
                             .frame(maxWidth: .infinity, alignment: .center) // 水平居中
-                            .id(line.id) // 为每一行设置唯一的 id
+                            .id(line.id)
+                        
+                        if !line.tran.isEmpty{
+                            Text(line.tran)
+                                // .font(.custom("",size: 14))
+                                .fontWeight(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .bold : .regular)
+                                .foregroundColor(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .green : line.beg < lyricsManager.position ? .gray : .teal)
+                                .frame(maxWidth: .infinity, alignment: .center) // 水平居中
+                                .padding(.bottom, 5)
+                        }
                     }
-                    Spacer() // Push content upwards
+                    Spacer()
                 }
                 .background(Color.clear) // 父视图背景也是透明的
             }
