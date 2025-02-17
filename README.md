@@ -6,8 +6,5 @@
 app: MacOS APP 主要用来在状态栏展示下载的歌词  
 server:GIN Web 调用第三方API获取歌词,合并结果提供给APP调用获取歌词接口
 
-### 启动
-... 建议不启动
-
 ### 鸣谢
 [LyricFever](https://github.com/aviwad/LyricFever)
