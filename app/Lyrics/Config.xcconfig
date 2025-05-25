@@ -1,0 +1,11 @@
+//
+//  Config.xcconfig
+//  Lyrics
+//
+//  Created by 陈爱全 on 2025/3/14.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+API_BASE_URL="http://lyrics.aiquan.fun

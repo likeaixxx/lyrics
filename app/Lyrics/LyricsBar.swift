@@ -4,6 +4,7 @@
 //
 //  Created by 陈爱全 on 2024/5/15.
 //
+
 import Foundation
 import AppKit
 import SwiftUI
@@ -26,7 +27,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarItem: NSStatusItem?
     var lyricsManager = LyricsManager()
     var hudWindow: LyricsHUD?
-    var add : Int32 = 0
+    var add: Int32 = 0
+    private var timer: DispatchSourceTimer?
+    private var autoTidyTimer: DispatchSourceTimer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         required()
@@ -35,22 +38,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.statusBarItem?.menu = NSMenu()
         self.statusBarItem?.menu?.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
-        Timer.scheduledTimer(withTimeInterval: 0.7, repeats: true) { [weak self] _ in
+        // 替换Timer.scheduledTimer为DispatchSourceTimer
+        setupUpdateTimer()
+        setupAutoTidyTimer()
+    }
+    
+    func setupUpdateTimer() {
+        let queue = DispatchQueue(label: "com.lyrics.updateQueue", qos: .userInteractive)
+        timer = DispatchSource.makeTimerSource(queue: queue)
+        timer?.schedule(deadline: .now(), repeating: .seconds(1), leeway: .milliseconds(100))
+        timer?.setEventHandler { [weak self] in
             self?.update()
         }
-        
-        // Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
-           // self?.adjustCumulativeOffset()
-        // }
-        
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        timer?.resume()
+    }
+    
+    func setupAutoTidyTimer() {
+        let queue = DispatchQueue(label: "com.lyrics.autoTidyQueue", qos: .utility)
+        autoTidyTimer = DispatchSource.makeTimerSource(queue: queue)
+        autoTidyTimer?.schedule(deadline: .now(), repeating: .seconds(1), leeway: .milliseconds(100))
+        autoTidyTimer?.setEventHandler { [weak self] in
             self?.autoTridy()
         }
+        autoTidyTimer?.resume()
     }
     
     func autoTridy() {
         DispatchQueue.main.async {
-            if self.add >= 5 {
+            if self.add >= 3 {
                 self.add = 0
                 self.adjustCumulativeOffset()
                 return
@@ -64,43 +79,58 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func adjustCumulativeOffset() {
         if let provider = Provider.shared.spotify {
             // 计算理论上的歌词位置
-            self.lyricsManager.cumulativeOffset = provider.playerPosition ?? 0.0
-            // print("Adjusted cumulativeOffset \(self.lyricsManager.cumulativeOffset)")
+            DispatchQueue.main.async {
+                self.lyricsManager.cumulativeOffset = provider.playerPosition ?? 0.0
+                // print("Adjusted cumulativeOffset \(self.lyricsManager.cumulativeOffset)")
+            }
         }
     }
 
     
     func update() {
         guard Provider.shared.playing() else {
-            updateBarTitle(message: "...")
+            DispatchQueue.main.async {
+                self.updateBarTitle(message: "...")
+            }
             return
         }
         // 判断是不是下一首了
         if let track = Provider.shared.next(currentTrackID: self.lyricsManager.currentTrackID) {
-            self.lyricsManager.lyricLines = []
-            self.lyricsManager.song = track.name ?? ""
-            self.lyricsManager.singer = track.artist ?? ""
-            self.lyricsManager.currentTrackID = track.id?() ?? ""
-            
-            updateBarTitle(message: "...")
+            DispatchQueue.main.async {
+                self.updateBarTitle(message: "...")
+                self.lyricsManager.lyricLines = []
+                self.lyricsManager.song = track.name ?? ""
+                self.lyricsManager.singer = track.artist ?? ""
+                self.lyricsManager.currentTrackID = track.id?() ?? ""
+                self.lyricsManager.cumulativeOffset = 0  // 重置累积偏移量
+                self.lyricsManager.position = 0  // 重置位置
+                self.lyricsManager.offset = 0  // 重置偏移量
+            }
             
             // 更新歌词
-            LyricAPI(name: track.name, singer: track.artist, id: self.lyricsManager.currentTrackID, refresh: false)
+            LyricAPI(name: track.name, singer: track.artist, id: track.id?(), refresh: false)
                 .lyrics(success: { item in
                     self.createMenuWithItems(items: item, i: 0)
                 }) { message in
-                    self.updateBarTitle(message: message)
+                    DispatchQueue.main.async {
+                        self.updateBarTitle(message: message)
+                    }
                 }
-            sendNotification(title: track.name, subtitle: track.artist, body: "", imageUrlString: track.artworkUrl)
+            // sendNotification(title: track.name, subtitle: track.artist, body: "", imageUrlString: track.artworkUrl)
+            sendNotification(title: track.name, subtitle: track.artist, body: "", imageUrlString: nil)
         }
         
-         // 下一句
-        let offset = Double(self.lyricsManager.offset) / 1000
-        self.lyricsManager.position = self.lyricsManager.cumulativeOffset + offset
+        // 下一句
+        let localOffset = Double(self.lyricsManager.offset) / 1000
+        let localPosition = self.lyricsManager.cumulativeOffset + localOffset
+        
         if let lyricLine = self.lyricsManager.lyricLines.last(where: {
-            $0.beg <= self.lyricsManager.position && self.lyricsManager.position <= $0.end
+            $0.beg <= localPosition && localPosition <= $0.end
         }), !lyricLine.text.isEmpty {
-            updateBarTitle(message: lyricLine.text)
+            DispatchQueue.main.async {
+                self.lyricsManager.position = localPosition
+                self.updateBarTitle(message: lyricLine.text)
+            }
             // print("\(lyricLine.beg) --- \(lyricLine.end) ---  \(self.lyricsManager.position)")
         }
     }
@@ -117,7 +147,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     self.lyricsManager.song = item.name
                     self.lyricsManager.offset = 0
                     self.lyricsManager.position = 0
-                    adjustCumulativeOffset()
+                    self.lyricsManager.cumulativeOffset = 0  // 重置累积偏移量
+                    adjustCumulativeOffset()  // 重新调整偏移量
                     let menuItem = NSMenuItem(title: "♪ \(item.name) - \(item.singer) | \(item.type)", action: nil, keyEquivalent: "")
                     menu.addItem(menuItem)
                 } else {
@@ -148,38 +179,46 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.createMenuWithItems(items: itemList, i: index)
         ConfirmAPI(item: itemList[index])
             .confirm { message in
-                self.lyricsManager.lyricLines = []
-                self.updateBarTitle(message: message)
+                DispatchQueue.main.async {
+                    self.lyricsManager.lyricLines = []
+                    self.updateBarTitle(message: message)
+                }
             }
     }
     
     @objc func clean() {
-        self.lyricsManager.lyricLines = []
-        updateBarTitle(message: "...")
+        DispatchQueue.main.async {
+            self.lyricsManager.lyricLines = []
+            self.updateBarTitle(message: "...")
+        }
     }
     
     @objc func refresh() {
-        // 判断是不是下一首了
         if let track = Provider.shared.spotify?.currentTrack {
-            self.lyricsManager.lyricLines = []
-            updateBarTitle(message: "...")
+            DispatchQueue.main.async {
+                self.lyricsManager.lyricLines = []
+                self.lyricsManager.cumulativeOffset = 0  // 重置累积偏移量
+                self.lyricsManager.position = 0  // 重置位置
+                self.lyricsManager.offset = 0  // 重置偏移量
+                self.updateBarTitle(message: "...")
+            }
             // 更新歌词
-            LyricAPI(name: track.name, singer: track.artist, id: self.lyricsManager.currentTrackID, refresh: true)
+            LyricAPI(name: track.name, singer: track.artist, id: track.id?(), refresh: true)
                 .lyrics(success: { item in
                     self.createMenuWithItems(items: item, i: 0)
                 }) { message in
-                    self.updateBarTitle(message: message)
+                    DispatchQueue.main.async {
+                        self.updateBarTitle(message: message)
+                    }
                 }
         }
     }
     
     func updateBarTitle(message: String) {
-        // let font = NSFont(name: "Hannotate SC", size: 14) ?? NSFont.systemFont(ofSize: 14)
+        // let font = NSFont(name: "Maple Mono") ?? NSFont.systemFont(ofSize: 12)
         // let attributedTitle = NSAttributedString(string: message, attributes: [NSAttributedString.Key.font: font])
-        let attributedTitle = NSAttributedString(string: message)
-        DispatchQueue.main.async {
-            self.statusBarItem?.button?.attributedTitle = attributedTitle
-        }
+        // let attributedTitle = NSAttributedString(string: message)
+        self.statusBarItem?.button?.title = message
     }
     
     @objc func search() {
@@ -197,7 +236,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                     .lyrics { itemList in
                                         self.createMenuWithItems(items: itemList, i: 0)
                                     } failure: { message in
-                                        self.updateBarTitle(message: message)
+                                        DispatchQueue.main.async {
+                                            self.updateBarTitle(message: message)
+                                        }
                                     }
                             },
                  name: self.lyricsManager.song,
@@ -219,7 +260,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 lyricsManager: self.lyricsManager) { offset in
                     OffsetAPI(sid: self.lyricsManager.currentTrackID, lid: self.lyricsManager.lyricId, offset: offset)
                         .offset { message in
-                            self.updateBarTitle(message: message)
+                            DispatchQueue.main.async {
+                                self.updateBarTitle(message: message)
+                            }
                         }
                 }
             popover.contentViewController = NSHostingController(rootView: contentView)

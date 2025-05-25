@@ -13,19 +13,15 @@ struct SearchView: View {
     
     var body: some View {
         VStack {
-            Text("Research")
             TextField("Song Name", text: $name)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
             TextField("Singer", text: $singer)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
             Button(action: {
                 onSubmit(name, singer)
             }) {
                 Text("Submit")
-                    .foregroundColor(.blue)
             }
         }
-        .frame(width: 150, height: 100)
+        .frame(width: 125, height: 70)
         .padding()
     }
 }
@@ -40,7 +36,7 @@ struct DetailView: View {
                     Spacer()
                     ForEach(lyricsManager.lyricLines) { line in
                         Text(line.text)
-                            // .font(.custom("Hannotate SC", size: 18))
+                            // .font(.custom("Maple Mono", size: 12))
                             .fontWeight(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .bold : .regular)
                             .foregroundColor(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .green : line.beg < lyricsManager.position ? .gray : .teal)
                             .frame(maxWidth: .infinity, alignment: .center) // 水平居中
@@ -48,7 +44,7 @@ struct DetailView: View {
                         
                         if !line.tran.isEmpty{
                             Text(line.tran)
-                                // .font(.custom("",size: 14))
+                                // .font(.custom("Maple Mono",size: 12))
                                 .fontWeight(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .bold : .regular)
                                 .foregroundColor(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .green : line.beg < lyricsManager.position ? .gray : .teal)
                                 .frame(maxWidth: .infinity, alignment: .center) // 水平居中
@@ -80,26 +76,18 @@ struct OffsetView: View {
     var body: some View {
         VStack {
             TextField("", value: $lyricsManager.offset, formatter: NumberFormatter())
-                 .padding()
-                 .minimumScaleFactor(0.5)
-                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(width: 80)
             HStack {
-            
                 Button(action: increaseOffset) {
-                   Text("+")
-                       .foregroundColor(.blue)
-               }
-
-               Button(action: decreaseOffset) {
-                   Text("-")
-                       .foregroundColor(.blue)
-               }
-                
+                    Text("+")
+                }
+                Button(action: decreaseOffset) {
+                    Text("-")
+                }
                 Button(action: {
                     onSubmit(lyricsManager.offset)
                 }) {
                     Text("Submit")
-                        .foregroundColor(.blue)
                 }
             }
         }
