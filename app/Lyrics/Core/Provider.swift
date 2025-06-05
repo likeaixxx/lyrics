@@ -41,14 +41,8 @@ class Provider {
         
         let id = currentTrack.id?()
         if id != currentTrackID {
-            // Refresh Spotify application instance
-            self.spotify = {
-                guard let app = SBApplication(bundleIdentifier: "com.spotify.client") else {
-                    print("Failed to get Spotify proxy")
-                    return nil
-                }
-                return app
-            }()
+            spotify.pause?()
+            spotify.play?()
             return currentTrack
         }
         return nil
