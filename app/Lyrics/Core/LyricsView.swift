@@ -28,6 +28,10 @@ struct SearchView: View {
 
 struct DetailView: View {
     @ObservedObject var lyricsManager: LyricsManager
+    @State private var scale: CGFloat = 1.0 // 缩放比例
+
+    // 你可以自定义基础字号
+    let baseFontSize: CGFloat = 13
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -36,35 +40,44 @@ struct DetailView: View {
                     Spacer()
                     ForEach(lyricsManager.lyricLines) { line in
                         Text(line.text)
-                            // .font(.custom("Maple Mono", size: 12))
+                            .font(.system(size: line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? baseFontSize * scale  * 1.2 : baseFontSize * scale))
+                            // .font(.system(size: baseFontSize * scale))
                             .fontWeight(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .bold : .regular)
-                            .foregroundColor(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .green : line.beg < lyricsManager.position ? .gray : .teal)
-                            .frame(maxWidth: .infinity, alignment: .center) // 水平居中
+                            .foregroundColor(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .teal : .gray)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .multilineTextAlignment(.center) 
                             .id(line.id)
-                        
-                        if !line.tran.isEmpty{
+
+                        if !line.tran.isEmpty {
                             Text(line.tran)
-                                // .font(.custom("Maple Mono",size: 12))
+                                .font(.system(size: line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? baseFontSize * scale : baseFontSize * scale * 0.9))
                                 .fontWeight(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .bold : .regular)
-                                .foregroundColor(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .green : line.beg < lyricsManager.position ? .gray : .teal)
-                                .frame(maxWidth: .infinity, alignment: .center) // 水平居中
+                                .foregroundColor(line.beg <= lyricsManager.position && lyricsManager.position <= line.end ? .teal : .gray)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .multilineTextAlignment(.center)
                                 .padding(.bottom, 5)
                         }
                     }
                     Spacer()
                 }
-                .background(Color.clear) // 父视图背景也是透明的
+                .background(Color.clear)
             }
-            .frame(maxWidth: .infinity, alignment: .center) // 水平居中
-            .background(Color.clear) // 父视图背景也是透明的
+            .frame(maxWidth: .infinity, alignment: .center)
+            .background(Color.clear)
             .onChange(of: lyricsManager.position) { newPosition in
-                // 滚动到当前歌词行
                 if let currentLine = lyricsManager.lyricLines.first(where: { $0.beg <= newPosition && newPosition <= $0.end }) {
                     withAnimation {
                         proxy.scrollTo(currentLine.id, anchor: .center)
                     }
                 }
             }
+            .gesture(
+                MagnificationGesture()
+                    .onChanged { value in
+                        // 限制缩放范围
+                        scale = min(max(0.5, value), 3.0)
+                    }
+            )
         }
     }
 }

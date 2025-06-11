@@ -41,7 +41,14 @@ class Provider {
         
         let id = currentTrack.id?()
         if id != currentTrackID {
-            spotify.pause?()
+            spotify.playpause?()
+            spotify.play?()
+            spotify.play?()
+            spotify.play?()
+            spotify.play?()
+            spotify.play?()
+            spotify.play?()
+            spotify.play?()
             spotify.play?()
             return currentTrack
         }
