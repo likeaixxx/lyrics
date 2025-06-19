@@ -9,10 +9,9 @@ import Foundation
 import Combine
 
 
-let DOMAIN = "http://127.0.0.1:8331"
-let LYRICS = DOMAIN + "/api/v1/lyrics"
-let CONFIRM = DOMAIN + "/api/v1/lyrics/confirm"
-let OFFSET = DOMAIN + "/api/v1/lyrics/offset"
+let LYRICS = "/api/v1/lyrics"
+let CONFIRM = "/api/v1/lyrics/confirm"
+let OFFSET = "/api/v1/lyrics/offset"
 
 let NET_WORK_ERROR = "☹️Network Error"
 let NOTHING_FOUND = "☹️Nothing Found"
@@ -38,12 +37,12 @@ struct OffsetAPI: Codable {
 
 extension LyricAPI {
     // 歌词
-    func lyrics(success: @escaping ([LyricResponseItem]) -> Void, failure: @escaping (String) -> Void) {
+    func lyrics(host: String, success: @escaping ([LyricResponseItem]) -> Void, failure: @escaping (String) -> Void) {
         if self.name == nil {
             failure(INVALID)
             return
         }
-        var request = URLRequest(url: URL(string: LYRICS)!)
+        var request = URLRequest(url: URL(string: host + LYRICS)!)
         request.httpMethod = "POST"
         request.httpBody = try? JSONEncoder().encode(self)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -81,8 +80,8 @@ extension LyricAPI {
 }
 
 extension ConfirmAPI {
-    func confirm(failure: @escaping (String) -> Void) {
-        if let url = URL(string: CONFIRM) {
+    func confirm(host: String, failure: @escaping (String) -> Void) {
+        if let url = URL(string: host + CONFIRM) {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.httpBody = try? JSONEncoder().encode(self.item)
@@ -102,8 +101,8 @@ extension ConfirmAPI {
 }
 
 extension OffsetAPI {
-    func offset(failure: @escaping (String) -> Void) {
-        if let url = URL(string: OFFSET) {
+    func offset(host: String, failure: @escaping (String) -> Void) {
+        if let url = URL(string: host + OFFSET) {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.httpBody = try? JSONEncoder().encode(self)

@@ -115,3 +115,22 @@ struct OffsetView: View {
         lyricsManager.offset += 100
     }
 }
+
+struct SetHostView: View {
+    @State var host: String
+    var onSubmit: (String) -> Void
+
+    var body: some View {
+        VStack {
+            TextField("API Host", text: $host)
+            HStack {
+                Button(action: {
+                    onSubmit(host)
+                }) {
+                    Text("Submit")
+                }
+            }
+        }
+        .padding()
+    }
+}

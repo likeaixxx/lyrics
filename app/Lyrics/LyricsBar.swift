@@ -21,6 +21,18 @@ public class LyricsManager: ObservableObject {
     @Published var offset: Int64 = 0
     // ... 之前的属性 ...
     @Published var cumulativeOffset: Double = 0.0 // 单位：秒
+    
+    @Published var host: String {
+        didSet {
+            UserDefaults.standard.set(host, forKey: "api_host")
+        }
+    }
+    
+    init() {
+        // 从 UserDefaults 读取，如果没有则用默认值
+        self.host = UserDefaults.standard.string(forKey: "api_host") ?? "https://127.0.0.1:8331"
+        // 其他初始化...
+    }
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -35,9 +47,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
         required()
-        
+
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.statusBarItem?.menu = NSMenu()
+        self.statusBarItem?.menu?.addItem(NSMenuItem(title: "Set Host", action: #selector(setHost), keyEquivalent: ""))
         self.statusBarItem?.menu?.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
         // 替换Timer.scheduledTimer为DispatchSourceTimer
@@ -111,7 +124,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             // 更新歌词
             LyricAPI(name: track.name, singer: track.artist, id: track.id?(), refresh: false)
-                .lyrics(success: { item in
+                .lyrics(host: self.lyricsManager.host, success: { item in
                     self.createMenuWithItems(items: item, i: 0)
                 }) { message in
                     DispatchQueue.main.async {
@@ -167,6 +180,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // menu.addItem(NSMenuItem(title: "Report", action: #selector(clean), keyEquivalent: ""))
             menu.addItem(NSMenuItem(title: "Research", action: #selector(search), keyEquivalent: "f"))
             menu.addItem(NSMenuItem(title: "Offset", action: #selector(offset), keyEquivalent: ""))
+            menu.addItem(NSMenuItem(title: "Set Host", action: #selector(setHost), keyEquivalent: ""))
             menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
             self.statusBarItem?.menu = menu
         }
@@ -180,7 +194,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         self.createMenuWithItems(items: itemList, i: index)
         ConfirmAPI(item: itemList[index])
-            .confirm { message in
+            .confirm(host: self.lyricsManager.host) { message in
                 DispatchQueue.main.async {
                     self.lyricsManager.lyricLines = []
                     self.updateBarTitle(message: message)
@@ -206,7 +220,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             // 更新歌词
             LyricAPI(name: track.name, singer: track.artist, id: track.id?(), refresh: true)
-                .lyrics(success: { item in
+                .lyrics(host: self.lyricsManager.host, success: { item in
                     self.createMenuWithItems(items: item, i: 0)
                 }) { message in
                     DispatchQueue.main.async {
@@ -235,7 +249,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                 // Handle the submitted text here
                                 popover.performClose(nil)
                     LyricAPI.init(name: name, singer: singer, id: self.lyricsManager.currentTrackID, refresh: true)
-                                    .lyrics { itemList in
+                                    .lyrics(host: self.lyricsManager.host) { itemList in
                                         self.createMenuWithItems(items: itemList, i: 0)
                                     } failure: { message in
                                         DispatchQueue.main.async {
@@ -261,7 +275,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let contentView = OffsetView(
                 lyricsManager: self.lyricsManager) { offset in
                     OffsetAPI(sid: self.lyricsManager.currentTrackID, lid: self.lyricsManager.lyricId, offset: offset)
-                        .offset { message in
+                        .offset(host: self.lyricsManager.host) { message in
                             DispatchQueue.main.async {
                                 self.updateBarTitle(message: message)
                             }
@@ -292,6 +306,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSApplication.shared.activate(ignoringOtherApps: true)
             self.hudWindow = LyricsHUD(lyricsManager: self.lyricsManager)
             self.hudWindow?.showWindow()
+        }
+    }
+    
+    @objc func setHost() {
+        guard let statusItem = self.statusBarItem else { return }
+        let popover = NSPopover()
+        popover.behavior = .transient
+        if popover.isShown {
+            popover.performClose(nil)
+        } else {
+            let contentView = SetHostView(host: self.lyricsManager.host) { host in
+                self.lyricsManager.host = host
+            }
+            popover.contentViewController = NSHostingController(rootView: contentView)
+            popover.show(relativeTo: statusItem.button!.bounds, of: statusItem.button!, preferredEdge: .minY)
         }
     }
 }
