@@ -1,0 +1,9 @@
+name: lyrics
+
+services:
+    lyrics:
+        image: likeai1111/lyrics:latest
+        container_name: lyrics
+        # volumes:
+        #     - ./lyrics.db:/app/lyrics.db
+        restart: unless-stopped

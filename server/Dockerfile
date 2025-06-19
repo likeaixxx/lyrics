@@ -1,23 +1,30 @@
-FROM golang AS builder
-WORKDIR /build
+# ---------- Stage 1: Build ----------------------------------------------------
+# 1. Use a specific Go minor version for reproducibility
+FROM golang:1.23.3-bookworm AS builder
+
+# 2. Enable Go modules & turn off CGO right away
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
+
+WORKDIR /src
+
+# 3. Download dependencies first (better layer caching)
 COPY go.mod go.sum ./
 RUN go mod download
+
+# 4. Copy the rest of the source and build
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o lyrics .
+RUN go build -trimpath -ldflags="-s -w" -o /src/lyrics .
 
-# 使用 debian slim 替代 alpine
-FROM debian:12-slim
+# ---------- Stage 2: Minimal runtime -----------------------------------------
+# 5. Use distroless instead of Debian slim (smaller & safer)
+FROM gcr.io/distroless/static-debian12:nonroot
 
+# 6. Workdir and non-root already set by distroless, just copy binary
 WORKDIR /app
+COPY --from=builder /src/lyrics .
 
-# 安装证书
-RUN apt-get update && \
-    apt-get install -y ca-certificates && \
-    update-ca-certificates
-
-# 从构建阶段复制二进制文件
-COPY --from=builder /build/lyrics .
-
+# 7. Expose & run
 EXPOSE 8331
-
 ENTRYPOINT ["/app/lyrics"]

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		61336A322C00A8590062132C /* LyricsHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61336A312C00A8590062132C /* LyricsHUD.swift */; };
+		61A7B3A82DFFC52E00227A82 /* OpenLyricsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A7B3A72DFFC52E00227A82 /* OpenLyricsWindow.swift */; };
 		61E84F172BF5E40600C2B75E /* LyricsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E84F162BF5E40600C2B75E /* LyricsApp.swift */; };
 		61E84F1B2BF5E40700C2B75E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61E84F1A2BF5E40700C2B75E /* Assets.xcassets */; };
 		61E84F1E2BF5E40700C2B75E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 61E84F1D2BF5E40700C2B75E /* Preview Assets.xcassets */; };
@@ -35,6 +36,7 @@
 
 /* Begin PBXFileReference section */
 		61336A312C00A8590062132C /* LyricsHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LyricsHUD.swift; sourceTree = "<group>"; };
+		61A7B3A72DFFC52E00227A82 /* OpenLyricsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLyricsWindow.swift; sourceTree = "<group>"; };
 		61B1C7A12BFF49BA00C3C759 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		61B1C7A32BFF49BA00C3C759 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		61E84F132BF5E40600C2B75E /* Lyrics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lyrics.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -99,6 +101,7 @@
 				61E84F1F2BF5E40700C2B75E /* Lyrics.entitlements */,
 				61E84F1C2BF5E40700C2B75E /* Preview Content */,
 				61E84F352BF5E55600C2B75E /* LyricsBar.swift */,
+				61A7B3A72DFFC52E00227A82 /* OpenLyricsWindow.swift */,
 			);
 			path = Lyrics;
 			sourceTree = "<group>";
@@ -201,6 +204,7 @@
 				61E84F342BF5E52500C2B75E /* Spotify.swift in Sources */,
 				61E84F172BF5E40600C2B75E /* LyricsApp.swift in Sources */,
 				61E84F322BF5E51600C2B75E /* Provider.swift in Sources */,
+				61A7B3A82DFFC52E00227A82 /* OpenLyricsWindow.swift in Sources */,
 				61E84F362BF5E55600C2B75E /* LyricsBar.swift in Sources */,
 				61E84F2E2BF5E4D900C2B75E /* LyricsView.swift in Sources */,
 				61336A322C00A8590062132C /* LyricsHUD.swift in Sources */,
@@ -360,6 +364,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = likeai.Lyrics;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -395,6 +400,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = likeai.Lyrics;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};

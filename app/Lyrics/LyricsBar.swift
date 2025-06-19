@@ -30,8 +30,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var add: Int32 = 0
     private var timer: DispatchSourceTimer?
     private var autoTidyTimer: DispatchSourceTimer?
+    static private(set) var shared: AppDelegate!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppDelegate.shared = self
         required()
         
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -286,6 +288,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @objc func hud() {
         DispatchQueue.main.async {
+            // 应用在后台时拉到前台
+            NSApplication.shared.activate(ignoringOtherApps: true)
             self.hudWindow = LyricsHUD(lyricsManager: self.lyricsManager)
             self.hudWindow?.showWindow()
         }
