@@ -1,6 +1,13 @@
-### 鸣谢
-[LyricFever](https://github.com/aviwad/LyricFever)
+### Install Lyrics App
+Download: https://github.com/likeaixxx/lyrics/releases/download/release%2Fv0.5/MacOs.Spotify.Lyrics.App.zip
 
+### custom build
+```shell
+git clone https://github.com/likeaixxx/lyrics.git
+cd lyrics
+xcodebuild -project Lyrics.xcodeproj -scheme "Lyrics" -configuration Release
+```
+Open the build folder and copy the app to the Applications directory
 
 ### Setup server with docker
 Require a database file:
@@ -20,3 +27,6 @@ services:
             - ~/lyrics/lyrics.db:/app/lyrics.db
         restart: unless-stopped
 ```
+
+### Acknowledgements
+[LyricFever](https://github.com/aviwad/LyricFever)
