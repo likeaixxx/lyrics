@@ -2,20 +2,20 @@
 //  API.swift
 //  lyrics-v3
 //
-//  Created by 陈爱全 on 2024/5/15.
+//  Created by likeai on 2024/5/15.
 //
 
 import Foundation
 import Combine
 
 
-let LYRICS = "/api/v1/lyrics"
-let CONFIRM = "/api/v1/lyrics/confirm"
-let OFFSET = "/api/v1/lyrics/offset"
+private let LYRICS = "/api/v1/lyrics"
+private let CONFIRM = "/api/v1/lyrics/confirm"
+private let OFFSET = "/api/v1/lyrics/offset"
 
-let NET_WORK_ERROR = "☹️Network Error"
-let NOTHING_FOUND = "☹️Nothing Found"
-let INVALID = "☹️Invalid Track Name"
+private let NET_WORK_ERROR = "☹️Network Error"
+private let NOTHING_FOUND = "☹️Nothing Found"
+private let INVALID = "☹️Invalid Track Name"
 
 struct LyricAPI: Codable {
     let name: String?
@@ -38,7 +38,7 @@ struct OffsetAPI: Codable {
 extension LyricAPI {
     // 歌词
     func lyrics(host: String, success: @escaping ([LyricResponseItem]) -> Void, failure: @escaping (String) -> Void) {
-        if self.name == nil {
+        guard self.name != nil else {
             failure(INVALID)
             return
         }
@@ -46,8 +46,8 @@ extension LyricAPI {
         request.httpMethod = "POST"
         request.httpBody = try? JSONEncoder().encode(self)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        let session = URLSession.shared
-        let task = session.dataTask(with: request) { data, response, error in
+        request.timeoutInterval = 30.0
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 failure(error.localizedDescription)
                 return
@@ -86,9 +86,9 @@ extension ConfirmAPI {
             request.httpMethod = "POST"
             request.httpBody = try? JSONEncoder().encode(self.item)
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.timeoutInterval = 10.0
             
-            let session = URLSession.shared
-            let task = session.dataTask(with: request) { data, response, error in
+            let task = URLSession.shared.dataTask(with: request) { _, _, error in
                 if error != nil {
                     failure(NET_WORK_ERROR)
                     return
@@ -107,9 +107,9 @@ extension OffsetAPI {
             request.httpMethod = "POST"
             request.httpBody = try? JSONEncoder().encode(self)
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.timeoutInterval = 10.0
             
-            let session = URLSession.shared
-            let task = session.dataTask(with: request) { data, response, error in
+            let task = URLSession.shared.dataTask(with: request) { _, _, error in
                 if error != nil {
                     failure(NET_WORK_ERROR)
                     return

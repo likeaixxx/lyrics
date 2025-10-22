@@ -1,14 +1,14 @@
 //
 //  Provider.swift
-//  lyrics-v3
 //
-//  Created by 陈爱全 on 2024/5/16.
+//  Created by likeai on 2024/5/16.
 //
 import Foundation
 import ScriptingBridge
 
-class Provider {
+final class Provider {
     static let shared = Provider()
+    
     var spotify: SpotifyApplication? = {
         guard let app = SBApplication(bundleIdentifier: "com.spotify.client") else {
             print("Failed to get Spotify proxy")
@@ -19,8 +19,8 @@ class Provider {
     
     func playing() -> Bool {
         guard let spotify = self.spotify,
-              let _ = spotify.currentTrack?.name,
-              spotify.playerState == .playing else {
+              spotify.playerState == .playing,
+              spotify.currentTrack?.name != nil else {
             return false
         }
         return true
@@ -42,17 +42,15 @@ class Provider {
         let id = currentTrack.id?()
         if id != currentTrackID {
             spotify.playpause?()
-            spotify.play?()
-            spotify.play?()
-            spotify.play?()
-            spotify.play?()
-            spotify.play?()
-            spotify.play?()
-            spotify.play?()
-            spotify.play?()
+            while true {
+                print("play play play")
+                spotify.play?()
+                if spotify.playerState == .playing {
+                    break
+                }
+            }
             return currentTrack
         }
         return nil
     }
 }
-

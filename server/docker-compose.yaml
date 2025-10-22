@@ -7,3 +7,4 @@ services:
         # volumes:
         #     - ./lyrics.db:/app/lyrics.db
         restart: unless-stopped
+

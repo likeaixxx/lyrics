@@ -2,16 +2,20 @@
 //  Lyrics.swift
 //  lyrics-v3
 //
-//  Created by 陈爱全 on 2024/5/15.
+//  Created by likeai on 2024/5/15.
 //
 
 import Foundation
 import Combine
 
-let QQ    = "QQ Music"
-let KuGou = "KuGou Music"
-let NetEase = "NetEase Music"
+// MARK: - Music Source Constants
+enum MusicSource {
+    static let qq = "QQ Music"
+    static let kuGou = "KuGou Music"
+    static let netEase = "NetEase Music"
+}
 
+// MARK: - Models
 struct LyricLine: Identifiable {
     var id = UUID()
     let beg: TimeInterval
@@ -37,64 +41,126 @@ struct LyricResponseItem: Codable {
     let offset: Int64
 }
 
+// MARK: - Timestamp Model
+private struct Timestamp {
+    let minutes: Int
+    let seconds: Int
+    let milliseconds: Int
+    
+    var timeInterval: TimeInterval {
+        TimeInterval(minutes * 60 + seconds) + TimeInterval(milliseconds) / 1000.0
+    }
+}
+
+// MARK: - LyricResponseItem Extension
 extension LyricResponseItem {
     func Lyrics() -> [LyricLine] {
-        guard let lyricsData = Data(base64Encoded: self.lyrics),
-              let lyrics = String(data: lyricsData, encoding: .utf8) else {
-            print("Failed to decode lyrics from data. \(self.lyrics)")
-            return []
-        }
+        let lyricsLines = decodeBase64Lines(self.lyrics)
+        let transLines = decodeBase64Lines(self.trans)
         
-        let transData = Data(base64Encoded: self.trans)
-        let trans = String(data: transData ?? Data(), encoding: .utf8)
-        
-        let lyricsLines = lyrics.components(separatedBy: "[")
-        let transLines = trans?.components(separatedBy: "[") ?? []
+        guard !lyricsLines.isEmpty else { return [] }
         
         var result = [LyricLine]()
         
         for (index, lyricsLine) in lyricsLines.enumerated() {
-            let lyricsComponents = lyricsLine.components(separatedBy: "]")
-            let transComponents = index < transLines.count ? transLines[index].components(separatedBy: "]") : []
+            guard let lyricData = parseLyricLine(lyricsLine),
+                  !lyricData.text.isEmpty else { continue }
             
-            guard lyricsComponents.count > 1,
-                  let timeString = lyricsComponents.first?.trimmingCharacters(in: CharacterSet(charactersIn: "[]")),
-                  let text = lyricsComponents.last,
-                  let minutes = Int(timeString.components(separatedBy: ":").first ?? ""),
-                  let seconds = Int(timeString.components(separatedBy: ":").last?.components(separatedBy: ".").first ?? ""),
-                  let milliseconds = Int(timeString.components(separatedBy: ":").last?.components(separatedBy: ".").last ?? "") else { continue }
+            let transText = index < transLines.count ? parseTranslationLine(transLines[index]) : ""
+            let nextTime = index + 1 < lyricsLines.count ?
+                extractTimestamp(from: lyricsLines[index + 1]) :
+                nil
             
-            let totalSeconds = TimeInterval(minutes * 60 + seconds) + TimeInterval(milliseconds) / 1000.0
-            let line = text.decodeHTML()
-            let tran = index < transLines.count ? (transComponents.last?.decodeHTML() ?? "") : ""
-            
-            if !line.isEmpty {
-                let nextTimeString = index + 1 < lyricsLines.count ? lyricsLines[index + 1].components(separatedBy: "]").first : nil
-                let nextMinutes = Int(nextTimeString?.components(separatedBy: ":").first ?? "") ?? minutes
-                let nextSeconds = Int(nextTimeString?.components(separatedBy: ":").last?.components(separatedBy: ".").first ?? "") ?? seconds
-                let nextMilliseconds = Int(nextTimeString?.components(separatedBy: ":").last?.components(separatedBy: ".").last ?? "") ?? milliseconds
-                let nextTotalSeconds = TimeInterval(nextMinutes * 60 + nextSeconds) + TimeInterval(nextMilliseconds) / 1000.0
-                let end = (index + 1 < lyricsLines.count) ? nextTotalSeconds : totalSeconds + 5.0
-                result.append(LyricLine(beg: totalSeconds, text: line, tran: tran, end: end))
-            }
+            let endTime = nextTime?.timeInterval ?? (lyricData.time.timeInterval + 5.0)
+            result.append(LyricLine(
+                beg: lyricData.time.timeInterval,
+                text: lyricData.text,
+                tran: transText,
+                end: endTime
+            ))
         }
+        
         return result
+    }
+    
+    // MARK: - Private Helpers
+    
+    private func decodeBase64Lines(_ base64String: String) -> [String] {
+        guard let data = Data(base64Encoded: base64String),
+              let decodedString = String(data: data, encoding: .utf8) else {
+            if !base64String.isEmpty {
+                print("Failed to decode base64 string: \(base64String)")
+            }
+            return []
+        }
+        return decodedString.components(separatedBy: "[")
+    }
+    
+    private func parseLyricLine(_ line: String) -> (time: Timestamp, text: String)? {
+        let components = line.components(separatedBy: "]")
+        guard components.count > 1,
+              let timestamp = extractTimestamp(from: line) else { return nil }
+        
+        let text = components.last?.decodeHTML() ?? ""
+        return (time: timestamp, text: text)
+    }
+    
+    private func parseTranslationLine(_ line: String) -> String {
+        let components = line.components(separatedBy: "]")
+        return components.last?.decodeHTML() ?? ""
+    }
+    
+    private func extractTimestamp(from line: String) -> Timestamp? {
+        let components = line.components(separatedBy: "]")
+        guard let timeString = components.first?.trimmingCharacters(in: CharacterSet(charactersIn: "[]")) else {
+            return nil
+        }
+        return Timestamp.parse(timeString)
     }
 }
 
+// MARK: - Timestamp Parsing
+extension Timestamp {
+    static func parse(_ timeString: String) -> Timestamp? {
+        let parts = timeString.components(separatedBy: ":")
+        guard parts.count >= 2,
+              let minutes = Int(parts[0]) else { return nil }
+        
+        let subparts = parts[1].components(separatedBy: ".")
+        guard subparts.count >= 2,
+              let seconds = Int(subparts[0]),
+              let milliseconds = Int(subparts[1]) else { return nil }
+        
+        return Timestamp(minutes: minutes, seconds: seconds, milliseconds: milliseconds)
+    }
+}
+
+// MARK: - String HTML Decoding
 extension String {
-    // 歌词提出html文本
+    /// Decode HTML entities and remove whitespace characters
     func decodeHTML() -> String {
-        return self
-            .replacingOccurrences(of: "&apos;", with: "'")
-            .replacingOccurrences(of: "&quot;", with: "\"")
-            .replacingOccurrences(of: "&lt;", with: "<")
-            .replacingOccurrences(of: "&gt;", with: ">")
-            .replacingOccurrences(of: "&amp;", with: "&")
-            .replacingOccurrences(of: "\n", with: "")
-            .replacingOccurrences(of: "\r", with: "")
-            .replacingOccurrences(of: "\t", with: "")
-            .replacingOccurrences(of: "//", with: "")
-            .replacingOccurrences(of: "\\", with: "")
+        let htmlEntityMap: [String: String] = [
+            "&apos;": "'",
+            "&quot;": "\"",
+            "&lt;": "<",
+            "&gt;": ">",
+            "&amp;": "&"
+        ]
+        
+        let whitespaceCharacters = ["\n", "\r", "\t", "//", "\\"]
+        
+        var result = self
+        
+        // Replace HTML entities
+        htmlEntityMap.forEach { entity, replacement in
+            result = result.replacingOccurrences(of: entity, with: replacement)
+        }
+        
+        // Remove whitespace characters
+        whitespaceCharacters.forEach { char in
+            result = result.replacingOccurrences(of: char, with: "")
+        }
+        
+        return result
     }
 }

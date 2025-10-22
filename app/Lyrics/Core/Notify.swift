@@ -2,10 +2,8 @@
 //  Notify.swift
 //  lyrics-v3
 //
-//  Created by 陈爱全 on 2024/5/16.
+//  Created by likeai on 2024/5/16.
 //
-import Foundation
-import UserNotifications
 import Cocoa
 import UserNotifications
 import UserNotificationsUI
