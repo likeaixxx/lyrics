@@ -172,6 +172,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     self.lyricsManager.clearLyrics()
                     self.lyricsManager.position = position ?? 0
                     self.updateBarTitle(message: "...")
+                    self.currentPopover?.performClose(nil)
+                    self.currentPopover = nil
                     
                     self.fetchLyrics(
                         name: name,
