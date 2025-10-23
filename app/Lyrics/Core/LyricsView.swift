@@ -144,10 +144,10 @@ struct OffsetView: View {
                 .frame(width: UIConstants.offsetTextFieldWidth)
             HStack {
                 Button(action: { lyricsManager.offset -= UIConstants.offsetStep }) {
-                    Text("+")
+                    Text("-")
                 }
                 Button(action: { lyricsManager.offset += UIConstants.offsetStep }) {
-                    Text("-")
+                    Text("+")
                 }
                 Button(action: { onSubmit(lyricsManager.offset) }) {
                     Text("Submit")
