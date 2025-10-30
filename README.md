@@ -1,5 +1,5 @@
 ### Install Lyrics App
-Download: https://github.com/likeaixxx/lyrics/releases/download/release%2Fv0.5/MacOs.Spotify.Lyrics.App.zip
+[Download from release page](https://github.com/likeaixxx/lyrics/releases)
 
 ### custom build
 ```shell
