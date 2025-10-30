@@ -476,16 +476,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func hud() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-
-            // 如果已经有窗口,先关闭
-            if let existingWindow = self.hudWindow {
-                existingWindow.closeWindow()
-                self.hudWindow = nil
+            
+            if self.hudWindow != nil {
+                return
+            } else {
+                // 创建新窗口
+                NSApplication.shared.activate(ignoringOtherApps: true)
+                let hud = LyricsHUD(lyricsManager: self.lyricsManager) {
+                    self.hudWindow?.closeWindow()
+                    self.hudWindow = nil
+                }
+                self.hudWindow = hud
+                hud.showWindow()
             }
-
-            NSApplication.shared.activate(ignoringOtherApps: true)
-            self.hudWindow = LyricsHUD(lyricsManager: self.lyricsManager)
-            self.hudWindow?.showWindow()
+        }
+    }
+    
+    func openOrClose() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            if self.hudWindow != nil {
+                // 主动关闭：调用 closeWindow，然后由回调清理引用
+                self.hudWindow?.closeWindow()
+            } else {
+                // 创建新窗口
+                NSApplication.shared.activate(ignoringOtherApps: true)
+                let hud = LyricsHUD(lyricsManager: self.lyricsManager) {
+                    self.hudWindow?.closeWindow()
+                    self.hudWindow = nil
+                }
+                self.hudWindow = hud
+                self.hudWindow?.showWindow()
+            }
         }
     }
     

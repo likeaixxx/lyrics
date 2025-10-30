@@ -9,7 +9,7 @@ import SwiftUI
 // MARK: - Constants
 private struct UIConstants {
     // Font sizes
-    static let baseFontSize: CGFloat = 13
+    static let baseFontSize: CGFloat = 14
     static let activeFontScale: CGFloat = 1.2
     static let translatFontScale: CGFloat = 0.9
     
@@ -76,7 +76,8 @@ struct DetailView: View {
                     Spacer()
                     ForEach(lyricsManager.lyricLines) { line in
                         LyricLineView(
-                            line: line,
+                            line: line.text,
+                            tran: line.tran,
                             isActive: lyricsManager.isLineActive(line),
                             scale: scale
                         )
@@ -107,22 +108,23 @@ struct DetailView: View {
 
 // MARK: - LyricLineView
 private struct LyricLineView: View {
-    let line: LyricLine
+    let line: String
+    let tran: String
     let isActive: Bool
     let scale: CGFloat
     
     var body: some View {
         VStack(spacing: 0) {
-            Text(line.text)
-                .font(.system(size: UIConstants.baseFontSize * scale * (isActive ? UIConstants.activeFontScale : 1.0)))
+            Text(line)
+                .font(.custom("Google Sans Code", size: UIConstants.baseFontSize * scale * (isActive ? UIConstants.activeFontScale : 1.0)))
                 .fontWeight(isActive ? .bold : .regular)
                 .foregroundColor(isActive ? UIConstants.activeColor : UIConstants.inactiveColor)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .multilineTextAlignment(.center)
             
-            if !line.tran.isEmpty {
-                Text(line.tran)
-                    .font(.system(size: UIConstants.baseFontSize * scale * UIConstants.translatFontScale))
+            if (!tran.isEmpty) {
+                Text(tran)
+                    .font(.custom("Google Sans Code", size: UIConstants.baseFontSize * scale * UIConstants.translatFontScale))
                     .fontWeight(isActive ? .bold : .regular)
                     .foregroundColor(isActive ? UIConstants.activeColor : UIConstants.inactiveColor)
                     .frame(maxWidth: .infinity, alignment: .center)

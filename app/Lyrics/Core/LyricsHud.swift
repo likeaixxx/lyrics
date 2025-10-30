@@ -29,9 +29,12 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
     private var cancellables: Set<AnyCancellable> = []
     private var closeButton: NSButton?
     private var trackingArea: NSTrackingArea?
+    // 添加一个回调
+    public var onWindowClosed: (() -> Void)?
 
-    public init(lyricsManager: LyricsManager) {
+    public init(lyricsManager: LyricsManager, onWindowClosed: (() -> Void)?) {
         self.lyricsManager = lyricsManager
+        self.onWindowClosed = onWindowClosed
         super.init(nibName: nil, bundle: nil)
         setupWindow()
         observeLyricsManager()
@@ -319,5 +322,8 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
             self.hudWindow = nil
             self.closeButton = nil
         }
+        
+        // 通知外部类
+        self.onWindowClosed?()
     }
 }
