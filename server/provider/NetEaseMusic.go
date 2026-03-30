@@ -85,7 +85,6 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 	params.Add("type", "1")
 	params.Add("s", key)
 	queryUrl := netEaseMusicSearch + "?" + params.Encode()
-	log.Printf("[INFO] NETEASE escape URL %s", queryUrl)
 
 	headers := map[string]string{
 		"sec-ch-ua":                 "\"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
@@ -126,7 +125,6 @@ func (search NetEaseMusic) search(key string) (model.NetEaseSearchResponse, bool
 		log.Printf("[ERROR] GET Cookie Failed NetEase Music Search Error")
 		return response, true
 	}
-	log.Printf("[INFO] cookies %v", cookie[:strings.Index(cookie, ";")])
 	headers["Cookie"] = cookie[:strings.Index(cookie, ";")]
 	response, err = apputils.HttpGet[model.NetEaseSearchResponse](queryUrl, headers)
 	if err != nil {
