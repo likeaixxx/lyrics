@@ -2,12 +2,13 @@ package route
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	apputils "lyrics/app-utils"
 	"lyrics/model"
 	"lyrics/provider"
 	"lyrics/response"
 	"sync"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Run() {
@@ -31,8 +32,14 @@ func offset(c *gin.Context) {
 	response.Success(c)
 }
 
-// 俺也不知道网易云音乐抽什么风 provider.NetEaseMusic{}
-var search = []provider.Provider{provider.QQMusicLyrics{}, provider.NetEaseMusic{}}
+var search = []provider.Provider{
+	provider.QQMusicLyrics{},
+	provider.NetEaseMusic{},
+	provider.LRCLIB{},
+	provider.KugouLK{},
+	provider.NetEaseLK{},
+	provider.QQMusicLK{},
+}
 
 func lyrics(c *gin.Context) {
 	request := apputils.FromGinPostJson[model.SearchRequest](c)

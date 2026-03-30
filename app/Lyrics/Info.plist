@@ -2,6 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleIdentifier</key>
+	<string>likeai.Lyrics</string>
+	<key>CFBundleName</key>
+	<string>Lyrics</string>
+    <key>CFBundleExecutable</key>
+    <string>Lyrics</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundleIconName</key>
+    <string>AppIcon</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -9,9 +21,11 @@
 	</dict>
 	<key>NSAppleScriptEnabled</key>
 	<true/>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>I need to access Spotify to play the lyrics properly.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
-		<string>IntentIntent</string>
+		<string>OpenLyricsHUDIntent</string>
 	</array>
 </dict>
 </plist>

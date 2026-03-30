@@ -58,8 +58,6 @@ func HttpPost[T any, R any](form R, url string, headers map[string]string) (T, e
 		return data, err
 	}
 
-	log.Println(fmt.Sprintf("[INFO] Request Body: %s", string(body)))
-
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36")
 	for k, v := range headers {

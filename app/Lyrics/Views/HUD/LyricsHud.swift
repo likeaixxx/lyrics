@@ -7,11 +7,11 @@ final class LyricsWindow: NSWindow {
     override var canBecomeKey: Bool {
         return true
     }
-    
+
     override var canBecomeMain: Bool {
         return true
     }
-    
+
     override func keyDown(with event: NSEvent) {
         // 处理 Command + W
         if event.modifierFlags.contains(.command) &&
@@ -24,7 +24,7 @@ final class LyricsWindow: NSWindow {
 }
 
 public final class LyricsHUD: NSViewController, NSWindowDelegate {
-    var lyricsManager: LyricsManager
+    var lyricsManager: LyricsViewModel
     private var hudWindow: LyricsWindow?
     private var cancellables: Set<AnyCancellable> = []
     private var closeButton: NSButton?
@@ -32,7 +32,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
     // 添加一个回调
     public var onWindowClosed: (() -> Void)?
 
-    public init(lyricsManager: LyricsManager, onWindowClosed: (() -> Void)?) {
+    init(lyricsManager: LyricsViewModel, onWindowClosed: (() -> Void)?) {
         self.lyricsManager = lyricsManager
         self.onWindowClosed = onWindowClosed
         super.init(nibName: nil, bundle: nil)
@@ -61,7 +61,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
 
         print("✅ LyricsHUD 已释放")
     }
-    
+
     func observeLyricsManager() {
         lyricsManager.objectWillChange
             .sink { [weak self] _ in
@@ -90,7 +90,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        
+
         // 窗口基础设置
         wd.setFrameAutosaveName("Lyrics Window")
         wd.titlebarAppearsTransparent = true
@@ -98,40 +98,45 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
         wd.level = .floating
         wd.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         wd.acceptsMouseMovedEvents = true  // 允许接收鼠标移动事件
-        
+
         // 设置窗口背景透明和圆角
         wd.backgroundColor = NSColor.clear
         wd.isOpaque = false
         wd.hasShadow = true
-        
+
         // 创建容器视图 - 这个视图将有圆角
         let containerView = NSView()
         containerView.wantsLayer = true
-        containerView.layer?.cornerRadius = 10  // 适中的圆角
+        containerView.layer?.cornerRadius = 18  // macOS 26 风格的大圆角
+        containerView.layer?.cornerCurve = .continuous // 连续曲率圆角（Squircle）
         containerView.layer?.masksToBounds = true
-        containerView.layer?.borderWidth = 0.5
+        containerView.layer?.borderWidth = 1.0 // 稍微加粗一点边框以强调玻璃边缘
         // containerView.layer?.borderColor = NSColor.separatorColor.cgColor  // 使用系统分隔线颜色
         containerView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.layer?.borderColor = NSColor(white: 1.0, alpha: 0.08).cgColor
-        
+        containerView.layer?.borderColor = NSColor(white: 1.0, alpha: 0.15).cgColor // 提升亮度，模拟玻璃边缘反光
+
         // 创建 NSVisualEffectView - 放在容器内
         let visualEffectView = NSVisualEffectView()
         // 使用毛玻璃效果
         visualEffectView.blendingMode = .behindWindow
         visualEffectView.state = .active
-        visualEffectView.material = .underWindowBackground
+        visualEffectView.material = .hudWindow // HUD 材质更适合悬浮窗，或者尝试 .popover
         // 不设置固定的 appearance，让它跟随系统
         visualEffectView.translatesAutoresizingMaskIntoConstraints = false
         visualEffectView.wantsLayer = true
-        visualEffectView.layer?.cornerRadius = 10  // 与容器一致的圆角
+        visualEffectView.layer?.cornerRadius = 18  // 与容器一致的圆角
+        visualEffectView.layer?.cornerCurve = .continuous
         visualEffectView.layer?.masksToBounds = true
-        
+
         // 添加额外的半透明背景层 - 使用系统颜色
         let backgroundView = NSView()
         backgroundView.wantsLayer = true
         // 使用系统窗口背景色，会自动适应深色/浅色模式
 
-        backgroundView.layer?.cornerRadius = 10  // 与容器一致的圆角
+        // 使用系统窗口背景色，会自动适应深色/浅色模式
+
+        backgroundView.layer?.cornerRadius = 18  // 与容器一致的圆角
+        backgroundView.layer?.cornerCurve = .continuous
         backgroundView.layer?.masksToBounds = true
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.layer?.backgroundColor = NSColor.clear.cgColor
@@ -164,32 +169,32 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
         // 保存引用以便后续清理
         closeButton = button
         trackingArea = tracking
-        
+
         // 创建包含关闭按钮的容器视图
         let titleBarView = NSView()
         titleBarView.translatesAutoresizingMaskIntoConstraints = false
         titleBarView.wantsLayer = true
-        
+
         // 创建一个包装视图来防止滚动条
         let hostingContainerView = NSView()
         hostingContainerView.translatesAutoresizingMaskIntoConstraints = false
         hostingContainerView.wantsLayer = true
-        
+
         // 创建 NSHostingView - 不设置固定的颜色模式
         let hostingView = NSHostingView(rootView: DetailView(lyricsManager: lyricsManager)
             .background(Color.clear)
         )
         hostingView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         // 设置内容优先级，防止不必要的滚动
         hostingView.setContentHuggingPriority(.defaultLow, for: .vertical)
         hostingView.setContentHuggingPriority(.defaultLow, for: .horizontal)
         hostingView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
         hostingView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        
+
         // 设置窗口内容视图
         wd.contentView = containerView
-        
+
         // 构建视图层级
         containerView.addSubview(visualEffectView)
         visualEffectView.addSubview(backgroundView)
@@ -197,7 +202,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
         visualEffectView.addSubview(hostingContainerView)
         titleBarView.addSubview(button)
         hostingContainerView.addSubview(hostingView)
-        
+
         // 设置容器视图约束
         NSLayoutConstraint.activate([
             visualEffectView.topAnchor.constraint(equalTo: containerView.topAnchor),
@@ -213,7 +218,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
             backgroundView.trailingAnchor.constraint(equalTo: visualEffectView.trailingAnchor),
             backgroundView.bottomAnchor.constraint(equalTo: visualEffectView.bottomAnchor)
         ])
-        
+
         // 设置标题栏视图约束
         NSLayoutConstraint.activate([
             titleBarView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
@@ -221,7 +226,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
             titleBarView.trailingAnchor.constraint(equalTo: visualEffectView.trailingAnchor),
             titleBarView.heightAnchor.constraint(equalToConstant: 44)
         ])
-        
+
         // 设置关闭按钮约束 - 左上角
         NSLayoutConstraint.activate([
             button.leftAnchor.constraint(equalTo: titleBarView.leftAnchor, constant: 10),
@@ -239,7 +244,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
             hostingView.trailingAnchor.constraint(equalTo: hostingContainerView.trailingAnchor),
             hostingView.bottomAnchor.constraint(equalTo: hostingContainerView.bottomAnchor)
         ])
-        
+
         // 设置容器的约束（原来 hostingView 的约束）
         NSLayoutConstraint.activate([
             hostingContainerView.topAnchor.constraint(equalTo: titleBarView.bottomAnchor, constant: -5),
@@ -258,14 +263,14 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
         // 显示窗口
         showWindow()
     }
-    
+
     // 关闭窗口方法
     @objc func closeWindow() {
         DispatchQueue.main.async { [weak self] in
             self?.hudWindow?.close()
         }
     }
-    
+
     // 鼠标悬停效果
     public override func mouseEntered(with event: NSEvent) {
         if let userInfo = event.trackingArea?.userInfo,
@@ -280,7 +285,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
             }
         }
     }
-    
+
     public override func mouseExited(with event: NSEvent) {
         if let userInfo = event.trackingArea?.userInfo,
            let buttonType = userInfo["button"] as? String,
@@ -294,7 +299,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
             }
         }
     }
-    
+
     public func showWindow() {
         DispatchQueue.main.async { [weak self] in
             guard let window = self?.hudWindow else { return }
@@ -303,7 +308,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
             // 但窗口仍然可以接收键盘事件
         }
     }
-    
+
     public func windowWillClose(_ notification: Notification) {
         // 清理 tracking area
         if let trackingArea = trackingArea, let button = closeButton {
@@ -322,7 +327,7 @@ public final class LyricsHUD: NSViewController, NSWindowDelegate {
             self.hudWindow = nil
             self.closeButton = nil
         }
-        
+
         // 通知外部类
         self.onWindowClosed?()
     }
