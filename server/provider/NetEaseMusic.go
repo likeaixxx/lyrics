@@ -52,7 +52,6 @@ func (search NetEaseMusic) Lyrics(request model.SearchRequest) []model.MusicRela
 			singer = fmt.Sprintf("%s/%s", singer, artist.Name)
 		}
 		singer = strings.Replace(singer, "/", "", len(singer)-1)
-		log.Printf(fmt.Sprintf("[INFO] GET Song [%s - %s], MusicId [%d, %s]", song.Name, singer, song.Id, request.Id))
 
 		lyrics, err := search.lyrics(song.Id)
 		if err != nil {

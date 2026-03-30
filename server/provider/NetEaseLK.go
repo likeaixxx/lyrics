@@ -168,8 +168,6 @@ func (search NetEaseLK) lyricsLK(id int) (string, error) {
 	body, _ := io.ReadAll(resp.Body)
 	var singleLyricsResponse model.NetEaseLKSingleLyricsResponse
 	json.Unmarshal(body, &singleLyricsResponse)
-	
-	log.Printf("[INFO] Fetched LK NetEase code: %d", singleLyricsResponse.Code)
 
 	lyr := ""
 	if singleLyricsResponse.Yrc.Lyric != "" {

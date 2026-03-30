@@ -47,7 +47,6 @@ func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.MusicRel
 	}
 
 	for _, song := range itemList {
-		log.Printf(fmt.Sprintf("[INFO] GET Song [%s - %s], MusicId [%s, %s]", song.Name, song.Singer, song.Mid, request.Id))
 		lyrics, err := search.lyrics(song.Mid)
 		if err != nil {
 			log.Printf(err.Error())
@@ -70,7 +69,6 @@ func (search QQMusicLyrics) Lyrics(request model.SearchRequest) []model.MusicRel
 
 func (search QQMusicLyrics) search(source string) (model.QQMusicSearch, bool) {
 	key, err := app_utils.T2s(source)
-	log.Printf("[INFO] T2s Res " + key)
 	if err != nil {
 		log.Printf(fmt.Sprintf("[ERROR] T2s Failed [%s] %v", source, err))
 		key = source

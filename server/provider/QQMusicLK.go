@@ -62,8 +62,6 @@ func (search QQMusicLK) Lyrics(request model.SearchRequest) []model.MusicRelatio
 
 	for _, reqDat := range data {
 		for _, song := range reqDat.Data.Song.ItemList {
-			log.Printf(fmt.Sprintf("[INFO] GET LK Song [%s - %s], MusicId [%s, %s]", song.Name, song.Singer, song.Mid, request.Id))
-			
 			// We use endpoint 2 for QRC lyrics
 			lyricsURL := fmt.Sprintf("https://c.y.qq.com/qqmusic/fcgi-bin/lyric_download.fcg?musicid=%s&version=15&miniversion=82&lrctype=4", song.ID)
 			

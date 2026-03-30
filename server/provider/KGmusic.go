@@ -48,7 +48,6 @@ func (search KugouMusic) Lyrics(request model.SearchRequest) []model.MusicRelati
 	}
 
 	for _, info := range data.Data.Info {
-		log.Printf(fmt.Sprintf("[INFO] GET Song [%s - %s], MusicId [%s, %s]", info.Songname, info.Singername, info.Hash, request.Id))
 		detail, err := search.detail(info.Hash)
 		if err != nil {
 			log.Println(err)
