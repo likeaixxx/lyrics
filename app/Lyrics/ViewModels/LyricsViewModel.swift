@@ -3,6 +3,15 @@ import Combine
 import SwiftUI
 
 final class LyricsViewModel: ObservableObject {
+
+    /// Snapshot of (position, wall-clock time) taken whenever position is polled from Spotify.
+    /// Active word-timing lines use this to extrapolate position locally at display-link rate
+    /// without requiring the VM timer to fire at 60fps.
+    struct PositionAnchor: Equatable {
+        let position: Double
+        let date: Date
+        static let zero = PositionAnchor(position: 0, date: Date())
+    }
     // Current Track Info
     @Published var song: String = ""
     @Published var singer: String = ""
@@ -17,6 +26,7 @@ final class LyricsViewModel: ObservableObject {
     // Playback State
     @Published var position: Double = 0.0
     @Published var isPlaying: Bool = false
+    @Published var positionAnchor: PositionAnchor = .zero
 
     // Configuration
     @Published var host: String {
@@ -157,6 +167,8 @@ final class LyricsViewModel: ObservableObject {
         let spotifyPos = spotifyService.getCurrentPosition()
         let localOffset = Double(offset) / 1000.0
         self.position = spotifyPos + localOffset
+        // Refresh anchor so TimelineView-based views can extrapolate locally
+        self.positionAnchor = PositionAnchor(position: self.position, date: Date())
 
         // Find current line active
         if let idx = lyricLines.firstIndex(where: { $0.beg <= position && position <= $0.end }) {
@@ -172,8 +184,18 @@ final class LyricsViewModel: ObservableObject {
 
         if activeIndex >= 0 && activeIndex < lyricLines.count {
             let line = lyricLines[activeIndex]
-            let timeToEnd = line.end - position
-            nextInterval = max(0.1, timeToEnd)
+            if !line.words.isEmpty {
+                // Word-timing line: tick at word boundaries to keep the anchor fresh.
+                // Visual smoothness is handled by TimelineView inside the active line view.
+                // Cap at 0.5s so the anchor doesn't drift even between sparse word boundaries.
+                if let nextWord = line.words.first(where: { $0.beg > position }) {
+                    nextInterval = max(0.05, min(nextWord.beg - position, 0.5))
+                } else {
+                    nextInterval = max(0.05, min(line.end - position, 0.5))
+                }
+            } else {
+                nextInterval = max(0.1, line.end - position)
+            }
         } else if let nextLine = lyricLines.first(where: { $0.beg > position }) {
             let timeToStart = nextLine.beg - position
             nextInterval = max(0.1, timeToStart)

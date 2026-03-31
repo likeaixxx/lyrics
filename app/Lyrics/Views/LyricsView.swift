@@ -8,26 +8,17 @@ import SwiftUI
 
 // MARK: - Constants
 private struct UIConstants {
-    // Font sizes
     static let baseFontSize: CGFloat = 14
     static let activeFontScale: CGFloat = 1.2
     static let translatFontScale: CGFloat = 0.9
-
-    // Scale range
     static let minScale: CGFloat = 0.5
     static let maxScale: CGFloat = 3.0
-
-    // Offsets
     static let offsetStep: Int64 = 100
-
-    // Layout
     static let searchViewWidth: CGFloat = 125
     static let searchViewHeight: CGFloat = 70
     static let offsetTextFieldWidth: CGFloat = 80
     static let lyricSpacing: CGFloat = 10
     static let translationPadding: CGFloat = 5
-
-    // Colors
     static let activeColor = Color.teal
     static let inactiveColor = Color.gray
 }
@@ -55,9 +46,7 @@ struct SearchView: View {
         VStack {
             TextField("Song Name", text: $name)
             TextField("Singer", text: $singer)
-            Button(action: { onSubmit(name, singer) }) {
-                Text("Submit")
-            }
+            Button(action: { onSubmit(name, singer) }) { Text("Submit") }
         }
         .frame(width: UIConstants.searchViewWidth, height: UIConstants.searchViewHeight)
         .padding()
@@ -75,7 +64,6 @@ struct DetailView: View {
                 VStack(spacing: UIConstants.lyricSpacing) {
                     Spacer()
                     if lyricsManager.lyricLines.isEmpty {
-                        // 空状态提示
                         VStack(spacing: 12) {
                             Image(systemName: "music.note")
                                 .font(.system(size: 48))
@@ -85,12 +73,10 @@ struct DetailView: View {
                                 .foregroundColor(.primary.opacity(0.6))
                             if !lyricsManager.song.isEmpty {
                                 Text(lyricsManager.song)
-                                    .font(.body)
-                                    .foregroundColor(.gray)
+                                    .font(.body).foregroundColor(.gray)
                                 if !lyricsManager.singer.isEmpty {
                                     Text(lyricsManager.singer)
-                                        .font(.caption)
-                                        .foregroundColor(.gray.opacity(0.8))
+                                        .font(.caption).foregroundColor(.gray.opacity(0.8))
                                 }
                             }
                         }
@@ -101,7 +87,7 @@ struct DetailView: View {
                                 lyricLine: line,
                                 isActive: lyricsManager.isLineActive(line),
                                 scale: scale,
-                                position: lyricsManager.position
+                                positionAnchor: lyricsManager.positionAnchor
                             )
                             .id(line.id)
                         }
@@ -113,17 +99,16 @@ struct DetailView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .background(Color.clear)
             .onChange(of: lyricsManager.position) { newPosition in
-                if let currentLine = lyricsManager.lyricLines.first(where: { $0.beg <= newPosition && newPosition <= $0.end }) {
-                    withAnimation {
-                        proxy.scrollTo(currentLine.id, anchor: .center)
-                    }
+                if let line = lyricsManager.lyricLines.first(where: {
+                    $0.beg <= newPosition && newPosition <= $0.end
+                }) {
+                    withAnimation { proxy.scrollTo(line.id, anchor: .center) }
                 }
             }
             .gesture(
-                MagnificationGesture()
-                    .onChanged { value in
-                        scale = value.clamped(min: UIConstants.minScale, max: UIConstants.maxScale)
-                    }
+                MagnificationGesture().onChanged { value in
+                    scale = value.clamped(min: UIConstants.minScale, max: UIConstants.maxScale)
+                }
             )
         }
     }
@@ -134,61 +119,116 @@ private struct LyricLineView: View {
     let lyricLine: LyricLine
     let isActive: Bool
     let scale: CGFloat
-    let position: Double
+    let positionAnchor: LyricsViewModel.PositionAnchor
 
-    // Read font preference
     @AppStorage("lyricFontName") private var fontName: String = "Google Sans Code"
 
     var body: some View {
         VStack(spacing: 0) {
-            let fontSize = UIConstants.baseFontSize * scale * (isActive ? UIConstants.activeFontScale : 1.0)
-            
-            if isActive && !lyricLine.words.isEmpty {
-                Text(attributedText(for: lyricLine, position: position))
-                    .font(.custom(fontName, size: fontSize))
-                    .fontWeight(.bold)
-                    // Apply a general glow to the entire active line
-                    .shadow(color: UIConstants.activeColor.opacity(0.6), radius: 10, x: 0, y: 0) 
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .multilineTextAlignment(.center)
+            let fontSize = UIConstants.baseFontSize * scale
+                * (isActive ? UIConstants.activeFontScale : 1.0)
+
+            if !lyricLine.words.isEmpty {
+                // TimelineView 保持视图标识不变（不随 isActive 切换视图类型）。
+                // 每帧直接从 positionAnchor 推算 progress，激活第一帧即是正确进度，
+                // 彻底消除"先清底色再着色"的闪烁。
+                // inactive 行每帧只执行一次 guard-return，CPU 开销微乎其微。
+                TimelineView(.animation(paused: !isActive)) { context in
+                    GradientSweepText(
+                        text: lyricLine.text,
+                        progress: timeProgress(at: context.date),
+                        isActive: isActive,
+                        fontName: fontName,
+                        fontSize: fontSize
+                    )
+                }
             } else {
                 Text(lyricLine.text)
                     .font(.custom(fontName, size: fontSize))
                     .fontWeight(isActive ? .bold : .regular)
-                    .foregroundColor(isActive ? UIConstants.activeColor : Color.primary.opacity(0.6)) // Inactive use primary with opacity
-                    .shadow(color: isActive ? UIConstants.activeColor.opacity(0.6) : .clear, radius: 10, x: 0, y: 0) // Glow effect
+                    .foregroundColor(isActive ? UIConstants.activeColor : UIConstants.inactiveColor)
+                    .shadow(color: isActive ? UIConstants.activeColor.opacity(0.6) : .clear,
+                            radius: 10, x: 0, y: 0)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .multilineTextAlignment(.center)
             }
 
-            if (!lyricLine.tran.isEmpty) {
+            if !lyricLine.tran.isEmpty {
                 Text(lyricLine.tran)
-                    .font(.custom(fontName, size: UIConstants.baseFontSize * scale * UIConstants.translatFontScale))
+                    .font(.custom(fontName,
+                                  size: UIConstants.baseFontSize * scale * UIConstants.translatFontScale))
                     .fontWeight(isActive ? .bold : .regular)
-                    .foregroundColor(isActive ? UIConstants.activeColor : Color.primary.opacity(0.6))
-                    .shadow(color: isActive ? UIConstants.activeColor.opacity(0.4) : .clear, radius: 5, x: 0, y: 0)
+                    .foregroundColor(isActive ? UIConstants.activeColor : UIConstants.inactiveColor)
+                    .shadow(color: isActive ? UIConstants.activeColor.opacity(0.4) : .clear,
+                            radius: 5, x: 0, y: 0)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .multilineTextAlignment(.center)
                     .padding(.bottom, UIConstants.translationPadding)
             }
         }
+        // TimelineView 直接推算进度，无需 onChange 驱动动画。
     }
-    
-    // Attributed String calculation for word-by-word progress
-    private func attributedText(for line: LyricLine, position: Double) -> AttributedString {
-        var attrStr = AttributedString("")
-        for word in line.words {
-            var wordAttr = AttributedString(word.text)
-            // If the playback position has passed the word's start time
-            // To make it feel responsive, color it active when it starts.
-            if position >= word.beg {
-                wordAttr.foregroundColor = UIConstants.activeColor
-            } else {
-                wordAttr.foregroundColor = Color.primary.opacity(0.6)
-            }
-            attrStr.append(wordAttr)
-        }
-        return attrStr
+
+    /// 从 positionAnchor 外推当前播放位置，映射为行内 0…1 进度。
+    /// inactive 行直接返回 0（一次 guard 判断，零额外计算）。
+    private func timeProgress(at date: Date) -> Double {
+        guard isActive,
+              let lineStart = lyricLine.words.first?.beg,
+              let lineEnd   = lyricLine.words.last?.end,
+              lineEnd > lineStart else { return 0 }
+        let elapsed  = date.timeIntervalSince(positionAnchor.date)
+        let position = positionAnchor.position + elapsed
+        return min(1, max(0, (position - lineStart) / (lineEnd - lineStart)))
+    }
+}
+
+
+// MARK: - GradientSweepText
+/// Renders `text` with a left-to-right teal→gray gradient controlled by `progress`.
+///
+/// Design notes:
+/// - No `.frame(maxWidth: .infinity)` — gradient coordinate space = text's own bounds,
+///   so the sweep is always proportional to visible text width regardless of window size.
+/// - `feather` is intentionally narrow (0.06) to produce a crisp, LyricsX-style edge
+///   rather than a wide blur that looks smeared.
+private struct GradientSweepText: View {
+    let text: String
+    let progress: Double   // 0…1, driven by Core Animation via withAnimation(.linear)
+    let isActive: Bool
+    let fontName: String
+    let fontSize: CGFloat
+
+    /// Half-width of the soft transition edge, as a fraction of text width.
+    private let feather: Double = 0.06
+
+    var body: some View {
+        let color1 = isActive ? UIConstants.activeColor : UIConstants.inactiveColor
+        let color2 = isActive ? UIConstants.activeColor : UIConstants.inactiveColor
+        let color3 = UIConstants.inactiveColor
+        let color4 = UIConstants.inactiveColor
+
+        Text(text)
+            .font(.custom(fontName, size: fontSize))
+            // inactive 时 regular，active 时 bold —— 同一个 Text 改属性，不换视图
+            .fontWeight(isActive ? .bold : .regular)
+            .foregroundStyle(
+                LinearGradient(
+                    stops: [
+                        // progress=0 时全文为灰；progress=1 时全文为 teal
+                        // teal 区域 [0, progress-feather]，过渡区 [progress-feather, progress+feather]
+                        .init(color: color1, location: max(0, progress - feather * 2)),
+                        .init(color: color2, location: max(0, progress - feather)),
+                        .init(color: color3, location: min(1, progress + feather)),
+                        .init(color: color4, location: 1)
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            // inactive 时无光晕，active 时有光晕
+            .shadow(color: isActive ? UIConstants.activeColor.opacity(0.5) : .clear,
+                    radius: 8, x: 0, y: 0)
+            .multilineTextAlignment(.center)
     }
 }
 
@@ -202,15 +242,9 @@ struct OffsetView: View {
             TextField("", value: $lyricsManager.offset, formatter: NumberFormatter())
                 .frame(width: UIConstants.offsetTextFieldWidth)
             HStack {
-                Button(action: { lyricsManager.offset -= UIConstants.offsetStep }) {
-                    Text("-")
-                }
-                Button(action: { lyricsManager.offset += UIConstants.offsetStep }) {
-                    Text("+")
-                }
-                Button(action: { onSubmit(lyricsManager.offset) }) {
-                    Text("Submit")
-                }
+                Button(action: { lyricsManager.offset -= UIConstants.offsetStep }) { Text("-") }
+                Button(action: { lyricsManager.offset += UIConstants.offsetStep }) { Text("+") }
+                Button(action: { onSubmit(lyricsManager.offset) }) { Text("Submit") }
             }
         }
         .padding()
@@ -218,4 +252,3 @@ struct OffsetView: View {
 }
 
 // MARK: - SetHostView
-

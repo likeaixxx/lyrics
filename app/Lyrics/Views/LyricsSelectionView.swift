@@ -43,185 +43,187 @@ struct LyricsSelectionView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Left: List & Search
+            // ── Left Sidebar ──────────────────────────────────────────────
             VStack(spacing: 0) {
                 // Search Header
-                VStack(spacing: 16) {
-                    Text("Search Lyrics")
-                        .font(.title3.bold())
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 4)
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.teal)
+                        Text("Search Lyrics")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.primary)
+                    }
 
-                    VStack(spacing: 10) {
-                        HStack {
-                            Image(systemName: "music.note")
-                                .foregroundColor(.secondary)
-                                .frame(width: 16)
-                            TextField("Song Title", text: $searchTitle)
-                                .textFieldStyle(.plain)
-                        }
-                        .padding(8)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                        )
-
-                        HStack {
-                            Image(systemName: "person.fill")
-                                .foregroundColor(.secondary)
-                                .frame(width: 16)
-                            TextField("Singer", text: $searchSinger)
-                                .textFieldStyle(.plain)
-                        }
-                        .padding(8)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                        )
+                    VStack(spacing: 8) {
+                        SearchInputField(icon: "music.note", placeholder: "Song title", text: $searchTitle)
+                        SearchInputField(icon: "person", placeholder: "Singer", text: $searchSinger)
                     }
                     .onSubmit { doSearch() }
 
                     Button(action: doSearch) {
-                        HStack {
+                        HStack(spacing: 6) {
                             if isLoading {
                                 ProgressView()
-                                    .scaleEffect(0.6)
-                                    .frame(width: 16, height: 16)
+                                    .scaleEffect(0.65)
+                                    .frame(width: 14, height: 14)
                             } else {
-                                Image(systemName: "magnifyingglass")
+                                Image(systemName: "arrow.right.circle.fill")
+                                    .font(.system(size: 13))
                             }
-                            Text("Search")
-                                .fontWeight(.medium)
+                            Text(isLoading ? "Searching…" : "Search")
+                                .font(.system(size: 13, weight: .semibold))
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 9)
+                        .background(
+                            LinearGradient(
+                                colors: isLoading
+                                    ? [Color.teal.opacity(0.4), Color.teal.opacity(0.3)]
+                                    : [Color.teal.opacity(0.85), Color.teal.opacity(0.6)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 9))
+                        .shadow(color: Color.teal.opacity(0.3), radius: 6, y: 2)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.blue)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .buttonStyle(.plain)
                     .disabled(isLoading)
+                    .animation(.easeInOut(duration: 0.15), value: isLoading)
                 }
-                .padding(16)
-                // Search header transparent so it adopts the sidebar background, or keep it distinct?
-                // Let's keep it clean.
+                .padding(.horizontal, 16)
+                .padding(.vertical, 18)
 
                 Divider()
-                    .background(Color.white.opacity(0.1))
+                    .background(Color.white.opacity(0.07))
 
-                // Results List
-                ScrollView {
-                    LazyVStack(spacing: 2) {
-                        if items.isEmpty {
-                            VStack(spacing: 12) {
-                                Image(systemName: "doc.text.magnifyingglass")
-                                    .font(.largeTitle)
-                                    .foregroundColor(.secondary.opacity(0.5))
-                                Text(isLoading ? "Searching..." : "No results found")
-                                    .foregroundColor(.secondary)
+                // Results
+                Group {
+                    if items.isEmpty {
+                        VStack(spacing: 10) {
+                            Image(systemName: isLoading ? "ellipsis.circle" : "doc.text.magnifyingglass")
+                                .font(.system(size: 34))
+                                .foregroundStyle(.secondary.opacity(0.45))
+                            Text(isLoading ? "Searching…" : "No results")
+                                .font(.system(size: 13))
+                                .foregroundStyle(.secondary.opacity(0.6))
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 3) {
+                                ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                                    LyricRow(item: item, isSelected: selectedIndex == index)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            selectedIndex = index
+                                        }
+                                }
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 40)
-                        } else {
-                            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                                LyricRow(item: item, isSelected: selectedIndex == index)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        selectedIndex = index
-                                    }
-                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 10)
                         }
                     }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 8)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(width: 260)
-            .background(Color.black.opacity(0.3)) // Unified darker background for the sidebar
+            .frame(minWidth: 230, idealWidth: 260, maxWidth: 320)
+            .background(Color.black.opacity(0.28))
 
-            Divider()
-                .background(Color.black.opacity(0.5))
+            // Thin divider
+            Rectangle()
+                .fill(Color.white.opacity(0.07))
+                .frame(width: 1)
 
-            // Right: Preview
+            // ── Right Area (Previews & Action Bar) ─────────────────────────
             VStack(spacing: 0) {
-                // Header
+                HStack(spacing: 0) {
+                    // ── Middle Preview ─────────────────────────────────────────────
+                    VStack(spacing: 0) {
+                        // Header bar
                 ZStack {
-                    // Left aligned label (Optional, maybe remove if it feels cluttered, but keeping it for context)
+                    Color.black.opacity(0.18)
+
                     HStack {
-                         Text("Preview")
-                            .font(.headline)
-                            .foregroundColor(.secondary.opacity(0.5))
+                        Text("Preview")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.secondary.opacity(0.5))
+                            .padding(.leading, 18)
                         Spacer()
                     }
 
-                    // Centered Song Info
                     if let item = selectedItem {
-                        HStack(spacing: 8) {
+                        HStack(spacing: 0) {
                             Text(item.name)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.primary)
-                            Text("-")
-                                .foregroundColor(.secondary)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.primary)
+                                .lineLimit(1)
+                            Text("  ·  ")
+                                .foregroundStyle(.secondary.opacity(0.5))
+                                .font(.system(size: 14))
                             Text(item.singer)
-                                .font(.system(size: 15, weight: .regular))
-                                .foregroundColor(.secondary)
-
-                            // Provider Badge
-                            Text(item.type)
-                                .font(.system(size: 10, weight: .bold))
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.blue.opacity(0.2))
-                                .foregroundColor(.blue)
-                                .cornerRadius(4)
+                                .font(.system(size: 13, weight: .regular))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                            Spacer().frame(width: 10)
+                            ProviderBadge(type: item.type)
                         }
-                        .padding(.horizontal, 32) // Avoid overlapping with "Preview"
-                        .lineLimit(1)
+                        .padding(.horizontal, 80)
                     }
                 }
-                .frame(height: 60) // Taller header
-                .padding(.horizontal, 16)
-                .background(Color.black.opacity(0.2))
+                .frame(height: 52)
                 .overlay(
                     Rectangle()
-                        .frame(height: 1)
-                        .foregroundColor(Color.white.opacity(0.05)),
+                        .fill(Color.white.opacity(0.05))
+                        .frame(height: 1),
                     alignment: .bottom
                 )
 
-                // Content
+                // Lyrics content
                 ZStack {
-                    if let item = selectedItem {
+                    if let _ = selectedItem {
                         ScrollViewReader { proxy in
                             ScrollView {
-                                VStack(alignment: .center, spacing: 20) { // Center alignment for lyrics usually looks nice
+                                VStack(alignment: .center, spacing: 18) {
                                     ForEach(previewLines) { line in
                                         let isActive = line.id == activeLineId
-                                        VStack(spacing: 6) {
+                                        VStack(spacing: 5) {
                                             Text(line.text)
-                                                .font(.system(size: 16, weight: isActive ? .semibold : .medium, design: .rounded))
-                                                .foregroundColor(isActive ? .teal : .primary)
+                                                .font(.system(
+                                                    size: isActive ? 16 : 14,
+                                                    weight: isActive ? .semibold : .regular,
+                                                    design: .rounded
+                                                ))
+                                                .foregroundStyle(isActive ? AnyShapeStyle(Color.teal) : AnyShapeStyle(Color.primary.opacity(0.75)))
+                                                .shadow(color: isActive ? Color.teal.opacity(0.5) : .clear, radius: 8)
                                                 .multilineTextAlignment(.center)
                                                 .fixedSize(horizontal: false, vertical: true)
+                                                .animation(.easeInOut(duration: 0.2), value: isActive)
 
                                             if !line.tran.isEmpty {
                                                 Text(line.tran)
-                                                    .font(.system(size: 14, weight: isActive ? .regular : .light, design: .rounded))
-                                                    .foregroundColor(isActive ? .teal.opacity(0.8) : .secondary)
+                                                    .font(.system(
+                                                        size: isActive ? 13 : 12,
+                                                        weight: isActive ? .regular : .light,
+                                                        design: .rounded
+                                                    ))
+                                                    .foregroundStyle(isActive ? AnyShapeStyle(Color.teal.opacity(0.75)) : AnyShapeStyle(Color.secondary.opacity(0.6)))
                                                     .multilineTextAlignment(.center)
                                                     .fixedSize(horizontal: false, vertical: true)
+                                                    .animation(.easeInOut(duration: 0.2), value: isActive)
                                             }
                                         }
                                         .frame(maxWidth: .infinity)
+                                        .padding(.vertical, isActive ? 4 : 0)
                                         .id(line.id)
                                     }
                                 }
-                                .padding(.vertical, 24)
-                                .padding(.horizontal, 32)
-                                .padding(.bottom, 60) // Space for bottom bar
+                                .padding(.vertical, 28)
+                                .padding(.horizontal, 36)
+                                .padding(.bottom, 64)
                             }
                             .onAppear {
                                 updateActiveLine(position: lyricsManager.position)
@@ -253,40 +255,99 @@ struct LyricsSelectionView: View {
                             }
                             .simultaneousGesture(
                                 DragGesture()
-                                    .onChanged { _ in
-                                        pauseAutoFollow()
-                                    }
-                                    .onEnded { _ in
-                                        scheduleAutoFollowResume()
-                                    }
+                                    .onChanged { _ in pauseAutoFollow() }
+                                    .onEnded { _ in scheduleAutoFollowResume() }
                             )
                         }
                     } else {
-                        VStack(spacing: 16) {
+                        VStack(spacing: 14) {
                             Image(systemName: "music.mic")
-                                .font(.system(size: 48))
-                                .foregroundColor(.secondary.opacity(0.3))
-                                .padding(.bottom, 8)
-                            Text("Select a track to preview lyrics")
-                                .font(.title3)
-                                .fontWeight(.medium)
-                                .foregroundColor(.secondary.opacity(0.5))
-                            Text("Search and select a song from the sidebar")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary.opacity(0.3))
+                                .font(.system(size: 44))
+                                .foregroundStyle(.secondary.opacity(0.25))
+                            Text("Select a track to preview")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(.secondary.opacity(0.45))
+                            Text("Search and pick a result from the sidebar")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary.opacity(0.3))
                         }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                Divider().background(Color.white.opacity(0.05))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                // Bottom Bar
-                HStack(spacing: 12) {
+                // Thin divider
+                Rectangle()
+                    .fill(Color.white.opacity(0.07))
+                    .frame(width: 1)
+
+                // ── Right Raw LRC Preview ──────────────────────────────────────
+                VStack(spacing: 0) {
+                    // Header bar
+                    ZStack {
+                        Color.black.opacity(0.18)
+
+                        HStack {
+                            Text("Raw LRC")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.secondary.opacity(0.5))
+                                .padding(.leading, 18)
+                            Spacer()
+                        }
+                    }
+                    .frame(height: 52)
+                    .overlay(
+                        Rectangle()
+                            .fill(Color.white.opacity(0.05))
+                            .frame(height: 1),
+                        alignment: .bottom
+                    )
+
+                    // LRC Content
+                    ZStack {
+                        if let item = selectedItem {
+                            ScrollView {
+                                // rawLyrics() might need to be created if not present on item.
+                                Text(item.rawLyrics())
+                                    .font(.system(size: 12, weight: .regular, design: .monospaced))
+                                    .foregroundStyle(Color.primary.opacity(0.75))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.vertical, 28)
+                                    .padding(.horizontal, 24)
+                            }
+                        } else {
+                            VStack(spacing: 14) {
+                                Image(systemName: "doc.text")
+                                    .font(.system(size: 44))
+                                    .foregroundStyle(.secondary.opacity(0.25))
+                                Text("Select a track to preview raw LRC")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundStyle(.secondary.opacity(0.45))
+                                Text("Raw format (e.g. [00:12.34]Lyric)")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.secondary.opacity(0.3))
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .frame(minWidth: 280, idealWidth: 340, maxWidth: 450)
+                .background(Color.black.opacity(0.12))
+            } // End of HStack for previews
+
+            // Footer action bar
+                Rectangle()
+                    .fill(Color.white.opacity(0.05))
+                    .frame(height: 1)
+
+                HStack(spacing: 10) {
                     Spacer()
                     Button("Cancel") {
-                         NSApp.keyWindow?.close()
+                        NSApp.keyWindow?.close()
                     }
+                    .buttonStyle(GhostButtonStyle())
                     .keyboardShortcut(.cancelAction)
 
                     Button("Use Lyric") {
@@ -294,18 +355,20 @@ struct LyricsSelectionView: View {
                             onSelect(item)
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.blue)
+                    .buttonStyle(PrimaryButtonStyle())
                     .disabled(selectedItem == nil)
                     .keyboardShortcut(.defaultAction)
                 }
-                .padding(16)
-                .background(Color.black.opacity(0.2)) // Matching header background
+                .padding(.horizontal, 18)
+                .padding(.vertical, 14)
+                .background(Color.black.opacity(0.18))
             }
         }
-        .frame(width: 800, height: 550)
+        .frame(minWidth: 1000, idealWidth: 1200, minHeight: 440, idealHeight: 560)
         .preferredColorScheme(.dark)
     }
+
+    // MARK: - Logic (unchanged)
 
     private func doSearch() {
         guard !isLoading else { return }
@@ -364,6 +427,99 @@ struct LyricsSelectionView: View {
     }
 }
 
+// MARK: - Sub-components
+
+private struct SearchInputField: View {
+    let icon: String
+    let placeholder: String
+    @Binding var text: String
+    @State private var isFocused = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(isFocused ? .teal : .secondary.opacity(0.6))
+                .frame(width: 14)
+                .animation(.easeInOut(duration: 0.15), value: isFocused)
+            TextField(placeholder, text: $text)
+                .textFieldStyle(.plain)
+                .font(.system(size: 13))
+                .onSubmit { isFocused = false }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.white.opacity(isFocused ? 0.09 : 0.06))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(
+                            isFocused ? Color.teal.opacity(0.5) : Color.white.opacity(0.08),
+                            lineWidth: 1
+                        )
+                )
+        )
+        .onHover { hover in
+            withAnimation(.easeInOut(duration: 0.1)) { isFocused = hover }
+        }
+    }
+}
+
+private struct ProviderBadge: View {
+    let type: String
+
+    var body: some View {
+        Text(type.uppercased())
+            .font(.system(size: 9, weight: .bold))
+            .tracking(0.5)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(Capsule().fill(Color.teal.opacity(0.18)))
+            .foregroundStyle(Color.teal.opacity(0.9))
+            .overlay(Capsule().strokeBorder(Color.teal.opacity(0.25), lineWidth: 0.5))
+    }
+}
+
+private struct GhostButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .medium))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.white.opacity(configuration.isPressed ? 0.1 : 0.06))
+            )
+            .foregroundStyle(.primary.opacity(0.85))
+    }
+}
+
+private struct PrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .semibold))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 7)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(
+                        LinearGradient(
+                            colors: isEnabled
+                                ? [Color.teal.opacity(configuration.isPressed ? 0.6 : 0.85), Color.teal.opacity(0.55)]
+                                : [Color.gray.opacity(0.3), Color.gray.opacity(0.2)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .foregroundStyle(isEnabled ? .white : .secondary)
+            .shadow(color: isEnabled ? Color.teal.opacity(0.3) : .clear, radius: 5, y: 2)
+    }
+}
+
 struct LyricRow: View {
     let item: LyricResponseItem
     let isSelected: Bool
@@ -372,37 +528,32 @@ struct LyricRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            // Icon
-            ZStack {
-                Circle()
-                    .fill(isSelected ? Color.blue : Color.white.opacity(0.1))
-                    .frame(width: 32, height: 32)
-
-                Image(systemName: "music.note")
-                    .font(.caption)
-                    .foregroundColor(isSelected ? .white : .secondary)
-            }
+            // Leading indicator
+            RoundedRectangle(cornerRadius: 3)
+                .fill(isSelected ? Color.teal : Color.clear)
+                .frame(width: 3, height: 32)
+                .animation(.easeInOut(duration: 0.15), value: isSelected)
 
             // Info
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(item.name)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(isSelected ? .primary : .primary.opacity(0.9))
+                        .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
+                        .foregroundStyle(isSelected ? Color.primary : Color.primary.opacity(0.85))
                         .lineLimit(1)
 
-                    Text(item.type)
+                    Text(item.type.uppercased())
                         .font(.system(size: 9, weight: .bold))
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 1)
-                        .background(isSelected ? Color.white.opacity(0.3) : Color.white.opacity(0.1))
-                        .foregroundColor(isSelected ? .white : .secondary)
-                        .cornerRadius(3)
+                        .tracking(0.3)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(isSelected ? Color.teal.opacity(0.2) : Color.white.opacity(0.08)))
+                        .foregroundStyle(isSelected ? Color.teal : Color.secondary)
                 }
 
                 Text(item.singer)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary.opacity(0.7))
                     .lineLimit(1)
             }
 
@@ -410,20 +561,28 @@ struct LyricRow: View {
 
             if isSelected {
                 Image(systemName: "checkmark")
-                    .font(.caption.bold())
-                    .foregroundColor(.blue)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.teal)
+                    .transition(.scale.combined(with: .opacity))
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
+        .padding(.leading, 6)
+        .padding(.trailing, 12)
+        .padding(.vertical, 7)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(isSelected ? Color.blue.opacity(0.1) : (isHovering ? Color.white.opacity(0.05) : Color.clear))
+                .fill(
+                    isSelected
+                        ? Color.teal.opacity(0.08)
+                        : (isHovering ? Color.white.opacity(0.04) : Color.clear)
+                )
         )
+        .contentShape(Rectangle())
         .onHover { hover in
             withAnimation(.easeInOut(duration: 0.1)) {
                 isHovering = hover
             }
         }
+        .animation(.easeInOut(duration: 0.12), value: isSelected)
     }
 }

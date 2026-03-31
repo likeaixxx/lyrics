@@ -30,6 +30,14 @@ private struct Timestamp {
 
 // MARK: - LyricResponseItem Extension
 extension LyricResponseItem {
+    func rawLyrics() -> String {
+        guard let data = Data(base64Encoded: self.lyrics),
+              let decodedString = String(data: data, encoding: .utf8) else {
+            return ""
+        }
+        return decodedString
+    }
+
     func Lyrics() -> [LyricLine] {
         guard let data = Data(base64Encoded: self.lyrics),
               let decodedString = String(data: data, encoding: .utf8) else {

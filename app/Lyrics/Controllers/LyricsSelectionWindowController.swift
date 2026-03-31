@@ -13,7 +13,7 @@ final class LyricsSelectionWindowController: NSWindowController {
 
         // Create borderless window using custom subclass
         let window = SelectionWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 800, height: 550),
+            contentRect: NSRect(x: 0, y: 0, width: 1100, height: 550),
             styleMask: [.borderless, .fullSizeContentView, .resizable],
             backing: .buffered,
             defer: false
